@@ -5,7 +5,8 @@ import { Canvas } from "@react-three/fiber";
 import { PerformanceMonitor } from "@react-three/drei";
 import { lowerTier, pickInitialTier, qualitySettings, type QualityTier } from "@/lib/quality";
 import { store } from "@/lib/store";
-import { PlaceholderDrop } from "@/scene/PlaceholderDrop";
+import { Director } from "@/scene/Director";
+import { Liquid } from "@/scene/liquid/Liquid";
 
 function initialTier(): QualityTier {
   const tier = pickInitialTier();
@@ -33,7 +34,8 @@ export function Scene() {
       }}
     >
       <PerformanceMonitor onDecline={decline} />
-      <PlaceholderDrop />
+      <Director />
+      <Liquid tier={tier} />
     </Canvas>
   );
 }

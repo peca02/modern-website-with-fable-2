@@ -1,4 +1,5 @@
-// Usage: npm run shots -- <chapter-id> <width> [--reduced] [--url=http://localhost:3000]
+// Usage: npm run shots -- <chapter-id> <width> [--reduced] [--pointer=0.6,0.4] [--url=http://localhost:3000]
+// --pointer takes viewport fractions and parks the mouse there before the shot.
 // One chapter and one width per run. Output: shots/<chapter>-<width>[-reduced].png
 import { mkdir } from "node:fs/promises";
 import { chromium } from "playwright";
@@ -9,6 +10,7 @@ const flags = args.filter((arg) => arg.startsWith("--"));
 const [chapter = "still", widthArg = "1440"] = args.filter((arg) => !arg.startsWith("--"));
 const width = Number(widthArg);
 const reduced = flags.includes("--reduced");
+const pointer = flags.find((flag) => flag.startsWith("--pointer="))?.slice(10).split(",").map(Number);
 const url = flags.find((flag) => flag.startsWith("--url="))?.slice(6) ?? "http://localhost:3000";
 
 const browser = await chromium.launch({
@@ -33,15 +35,33 @@ await page.evaluate((id) => {
   const target = document.getElementById(id);
   if (target) window.scrollTo(0, target.getBoundingClientRect().top + window.scrollY);
 }, chapter);
+if (pointer) {
+  const size = page.viewportSize();
+  await page.mouse.move(pointer[0] * size.width, pointer[1] * size.height, { steps: 4 });
+}
 await page.waitForTimeout(2500);
 
+// Relative only: headless Chromium renders on the CPU (SwiftShader).
+const fps = await page.evaluate(
+  () =>
+    new Promise((resolve) => {
+      let frames = 0;
+      const start = performance.now();
+      const count = (now) => {
+        frames += 1;
+        if (now - start < 2000) requestAnimationFrame(count);
+        else resolve(Math.round((frames * 1000) / (now - start)));
+      };
+      requestAnimationFrame(count);
+    }),
+);
 const state = await page.evaluate(() => ({
   motion: document.documentElement.dataset.motion,
   webgl2: Boolean(document.createElement("canvas").getContext("webgl2")),
   scrollY: Math.round(window.scrollY),
 }));
 await mkdir("shots", { recursive: true });
-const file = `shots/${chapter}-${width}${reduced ? "-reduced" : ""}.png`;
+const file = `shots/${chapter}-${width}${reduced ? "-reduced" : ""}${pointer ? "-pointer" : ""}.png`;
 await page.screenshot({ path: file });
-console.log(JSON.stringify({ file, sceneReady, ...state, errors }));
+console.log(JSON.stringify({ file, sceneReady, fps, ...state, errors }));
 await browser.close();
