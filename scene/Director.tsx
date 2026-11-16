@@ -2,6 +2,7 @@
 
 import { useFrame } from "@react-three/fiber";
 import { MathUtils, PerspectiveCamera } from "three";
+import { loadClock } from "@/lib/loadClock";
 import { store } from "@/lib/store";
 import { direct, direction } from "@/scene/direction";
 
@@ -28,8 +29,9 @@ export function Director() {
 
     // Lens shift instead of turning the camera: the subject moves off-centre
     // without the stretch an off-axis sphere gets under perspective.
-    const shiftX = MathUtils.lerp(shot.tallX, shot.wideX, wide);
-    const shiftY = MathUtils.lerp(shot.tallY, shot.wideY, wide);
+    // As the preloader the drop sits in the middle; it glides to its place on release.
+    const shiftX = MathUtils.lerp(shot.tallX, shot.wideX, wide) * loadClock.settle;
+    const shiftY = MathUtils.lerp(shot.tallY, shot.wideY, wide) * loadClock.settle;
     camera.setViewOffset(size.width, size.height, -shiftX * size.width, -shiftY * size.height, size.width, size.height);
   });
 

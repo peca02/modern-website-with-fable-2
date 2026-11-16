@@ -5,6 +5,7 @@ import { SceneMount } from "@/components/SceneMount";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { ChapterNav } from "@/components/ChapterNav";
 import { PointerInput } from "@/components/PointerInput";
+import { Preloader } from "@/components/Preloader";
 import { site } from "@/lib/content";
 import "./globals.css";
 
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="type-body bg-page text-ink">
         <SceneMount />
         <PointerInput />
+        <Preloader />
         <ChapterNav />
         <SmoothScroll>{children}</SmoothScroll>
       </body>

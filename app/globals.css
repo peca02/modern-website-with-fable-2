@@ -3,6 +3,9 @@
 /* Landscape framing: the scene moves its subject sideways, so text takes a side column. */
 @custom-variant wide (@media (min-aspect-ratio: 1/1));
 
+/* The preloader hides content only where scripts can show it again. */
+@custom-variant scripting (@media (scripting: enabled));
+
 @theme {
   --color-*: initial;
   --color-page: #edeff1;
@@ -161,6 +164,19 @@
   :focus-visible {
     outline: 2px solid var(--color-field);
     outline-offset: 4px;
+  }
+
+  @media (scripting: enabled) {
+    [data-await-load] {
+      transition:
+        opacity 0.8s var(--ease-settle),
+        visibility 0s;
+    }
+
+    html:not([data-loaded]) [data-await-load] {
+      opacity: 0;
+      visibility: hidden;
+    }
   }
 
   ::selection {

@@ -29,6 +29,7 @@ export function ChapterNav() {
   return (
     <nav
       aria-label={navigation.label}
+      data-await-load=""
       className="pointer-events-none fixed inset-x-4 top-4 z-20 flex justify-center md:inset-x-8 md:top-6 md:justify-end"
     >
       <ul ref={list} className="pointer-events-auto flex gap-1 rounded-full bg-ink p-1">

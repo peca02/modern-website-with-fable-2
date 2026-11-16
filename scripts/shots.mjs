@@ -35,6 +35,10 @@ const sceneReady = await page
   .then(() => true)
   .catch(() => false);
 await page.evaluate(() => document.fonts.ready);
+const loaded = await page
+  .waitForSelector("html[data-loaded]", { timeout: 20000 })
+  .then(() => true)
+  .catch(() => false);
 // ScrollSmoother fixes the wrapper, so scrollIntoView does nothing; scroll the window instead.
 await page.evaluate(
   ([id, shift]) => {
@@ -71,6 +75,6 @@ const state = await page.evaluate(() => ({
 }));
 await mkdir("shots", { recursive: true });
 const file = `shots/${chapter}${offset ? `+${offset}` : ""}-${width}${reduced ? "-reduced" : ""}${pointer ? "-pointer" : ""}${touch ? "-touch" : ""}.png`;
-console.log(JSON.stringify({ file, sceneReady, fps, ...state, errors }));
+console.log(JSON.stringify({ file, sceneReady, loaded, fps, ...state, errors }));
 await page.screenshot({ path: file, timeout: 90000 });
 await browser.close();

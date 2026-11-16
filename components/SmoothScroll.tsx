@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { duration, gsap, motionQueries, ScrollSmoother, ScrollTrigger, SplitText, useGSAP } from "@/lib/gsap";
 import { chapterTriggerId } from "@/lib/jump";
+import { whenReleased } from "@/lib/loadClock";
 import { store } from "@/lib/store";
 
 export function SmoothScroll({ children }: { children: ReactNode }) {
@@ -37,8 +38,9 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
         });
 
         // Lines rise out of a mask like a liquid level. Splitting waits for
-        // the fonts so the line breaks are the real ones.
-        void document.fonts.ready.then(() => {
+        // the fonts so the line breaks are the real ones, and for the
+        // preloader so the first screen rises as the drop takes its place.
+        void Promise.all([document.fonts.ready, whenReleased()]).then(() => {
           if (!alive) return;
           context.add(() => {
             gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((element) => {
@@ -96,7 +98,7 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
   });
 
   return (
-    <div id="smooth-wrapper" className="relative z-10">
+    <div id="smooth-wrapper" data-await-load="" className="relative z-10">
       <div id="smooth-content">{children}</div>
     </div>
   );

@@ -10,6 +10,8 @@ export type PoseInput = {
   reach: number;
   field: number;
   split: number;
+  /** 0–1, how much of the resting drop has gathered (the preloader) */
+  mass: number;
 };
 
 const { rest, lean, magnet } = liquidModel;
@@ -42,11 +44,13 @@ function restPose(pose: Pose, input: PoseInput, leaning: Lean) {
   const extension = Math.hypot(leaning.x, leaning.y) / lean.reach;
   const breath = input.still ? 0 : Math.sin(input.time * 0.7) * 0.006;
   // The lobe thins as it travels, which turns the bulge into a shoulder.
-  const lobeRadius = lean.radius * (1 - 0.18 * extension);
-  const lobeY = Math.max(rest.lift + leaning.y / rest.squash, lobeRadius * 0.6);
+  // Volume follows mass, so the radius follows its cube root.
+  const size = Math.cbrt(Math.max(input.mass, 0.001));
+  const lobeRadius = lean.radius * (1 - 0.18 * extension) * size;
+  const lobeY = Math.max((rest.lift + leaning.y / rest.squash) * size, lobeRadius * 0.6);
   // The main mass gives up what the lobe carries away, so the body leans instead of growing.
-  setBlob(pose, 0, leaning.x * 0.22, rest.lift, 0, rest.radius * (1 + breath - 0.07 * extension));
-  setBlob(pose, 1, leaning.x, lobeY, 0, lobeRadius);
+  setBlob(pose, 0, leaning.x * 0.22 * size, rest.lift * size, 0, rest.radius * (1 + breath - 0.07 * extension) * size);
+  setBlob(pose, 1, leaning.x * size, lobeY, 0, lobeRadius);
 }
 
 // A chain of shrinking blobs toward the magnet: the smooth minimum turns it

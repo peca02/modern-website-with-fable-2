@@ -5,6 +5,7 @@ import { extend, useFrame, type ThreeElement } from "@react-three/fiber";
 import { Vector3, type Camera, type CanvasTexture, type Mesh } from "three";
 import { site } from "@/lib/content";
 import type { QualityTier } from "@/lib/quality";
+import { loadClock } from "@/lib/loadClock";
 import { store } from "@/lib/store";
 import { LiquidMaterial } from "@/scene/liquid/LiquidMaterial";
 import { direction } from "@/scene/direction";
@@ -23,7 +24,7 @@ extend({ LiquidMaterial });
 const lean = new Lean();
 const poseFrom = createPose();
 const poseTo = createPose();
-const poseInput: PoseInput = { time: 0, still: false, reach: 0, field: 0, split: 0 };
+const poseInput: PoseInput = { time: 0, still: false, reach: 0, field: 0, split: 0, mass: 0 };
 const pointerRay = new Vector3();
 const anchor = new Vector3();
 const point: Point3 = { x: 0, y: 0, z: 0 };
@@ -80,6 +81,7 @@ export function Liquid({ tier }: { tier: QualityTier }) {
     poseInput.reach = direction.reach;
     poseInput.field = direction.field;
     poseInput.split = direction.split;
+    poseInput.mass = loadClock.mass;
     writePose(direction.poseFrom, poseFrom, poseInput, lean);
     if (direction.poseTo === direction.poseFrom) {
       liquid.pose.set(poseFrom);

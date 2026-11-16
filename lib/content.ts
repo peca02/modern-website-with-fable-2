@@ -27,6 +27,11 @@ export const navigation = {
   ],
 } as const satisfies { label: string; items: readonly { id: ChapterId; name: string }[] };
 
+export const preloader = {
+  label: "Gathering",
+  unit: "%",
+} as const;
+
 export const still = {
   id: "still",
   headingSuffix: "magnetic liquid, shaped by a field",
