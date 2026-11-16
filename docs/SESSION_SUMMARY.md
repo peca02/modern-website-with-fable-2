@@ -2,9 +2,14 @@
 
 Branch: `claude/ecstatic-rubin-69cwed` (all work so far). Rewritten each session.
 
-Line for the owner to paste into the next session: "Pročitaj CLAUDE.md,
-docs/SESSION_SUMMARY.md i docs/ART_DIRECTION.md i nastavi. Prethodni rad je na
-grani `claude/ecstatic-rubin-69cwed`."
+Line for the owner to paste into the next session: "Prethodni rad je na grani
+`claude/ecstatic-rubin-69cwed`. Prvo uradi `git fetch origin` i
+`git merge --ff-only origin/claude/ecstatic-rubin-69cwed`, pa tek onda
+pročitaj CLAUDE.md, docs/SESSION_SUMMARY.md i docs/ART_DIRECTION.md i nastavi."
+
+The 5a session opened 14 commits behind the remote branch, with a summary
+that still said phase 2a was next. If this file's phase table does not show
+5b as next, the checkout is stale: fast-forward before doing anything else.
 
 ## Phases (one session each, merge two if a phase turns out small)
 
@@ -54,7 +59,8 @@ grani `claude/ecstatic-rubin-69cwed`."
 - `scene/direction.ts` (no three import): the shot list. Keys in story units
   for camera shots, liquid poses and grain shapes, plus number tracks
   (`reach`, `field`, `split`, grain weight). `direct()` samples them into
-  `direction`. All timing lives here.
+  `direction`. All timing lives here, including `unpinnedStory()`, which
+  `SmoothScroll.tsx` uses instead of the raw scroll track when pins are off.
 - `scene/Director.tsx`: calls `direct(store.story, store.field)` and sets the
   camera (elevation, span, lens shift for wide and portrait).
 - `scene/liquid/model.ts` (no three import): constants, the pose layout (a
@@ -206,6 +212,8 @@ part, hold, settle.
   caught transitions. The shot script waits up to 60 s for the preloader and
   12 s after the jump on wide screens; text reveals can still be caught
   mid-mask there, which is the slow clock, not a bug.
+- Checks that wait for a timer (sound suspend) poll for the state; fixed
+  delays fail on a slow container.
 - SDF additions must be bounded: an unclamped product term in `sdSlab` drew
   phantom surfaces far from the slab.
 - A pinned chapter is pinned for `pin / (pin + 1)` of its story unit and
@@ -251,7 +259,8 @@ Read `PROMPT.md` lines 670–739 once (checklist, quality bar, deliverables).
 5. Self-check: read `PROMPT.md` lines 53–178 (the hard rules) once and
    compare with the repository; the version table in `CLAUDE.md`; whether
    `CLAUDE.md` and `docs/ART_DIRECTION.md` match what was built.
-6. lint, typecheck, build, `npm run flow`; the pull request into `main`
+6. lint, typecheck, build, `npm run flow`; everything committed and pushed;
+   the pull request into `main`
    (summary, how to run, what was verified); the final report in Serbian
    (done, verified and how, not verified and why, what is weaker than
    wanted, where the author credit goes: `lib/content.ts`).

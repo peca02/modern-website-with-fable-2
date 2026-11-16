@@ -79,11 +79,13 @@ The owner is on a small 5-hour usage limit. Saving tokens matters more than spee
    paths, branch name), commit, push, tell the owner it is a good moment for a
    new session and give the one line to paste into it, with the branch name.
    Never wait for autocompact.
-10. A new session starts by reading this file, `docs/SESSION_SUMMARY.md` and
-    `docs/ART_DIRECTION.md` — not the codebase. Then: `git fetch origin`; if
-    the newest `claude/...` branch has commits this branch lacks, merge it;
-    `npm ci` if `node_modules` is missing. Open only the code files the next
-    step changes.
+10. A new session starts with `git fetch origin` and a fast-forward to the
+    remote copy of the work branch named in the owner's message: the fresh
+    checkout can be many commits behind, and then these docs are stale too.
+    If another `claude/...` branch has commits this one lacks, merge it. Only
+    then read this file, `docs/SESSION_SUMMARY.md` and
+    `docs/ART_DIRECTION.md` — not the codebase. `npm ci` if `node_modules` is
+    missing. Open only the code files the next step changes.
 11. After a limit reset or a long pause, continue exactly one thing.
 12. Keep this file, `docs/ART_DIRECTION.md` and `docs/SESSION_SUMMARY.md` short.
 13. Never depend on Ultracode or ask the owner to enable it.
