@@ -10,6 +10,7 @@ import { direct, direction } from "@/scene/direction";
 export function Director() {
   useFrame(({ camera, size }) => {
     direct(store.story, store.field);
+    store.fieldLevel = direction.field;
     if (!(camera instanceof PerspectiveCamera)) return;
 
     const { shot } = direction;

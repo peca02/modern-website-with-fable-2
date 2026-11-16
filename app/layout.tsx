@@ -3,6 +3,7 @@ import { Archivo, Instrument_Sans } from "next/font/google";
 import type { ReactNode } from "react";
 import { SceneMount } from "@/components/SceneMount";
 import { SmoothScroll } from "@/components/SmoothScroll";
+import { ChapterNav } from "@/components/ChapterNav";
 import { PointerInput } from "@/components/PointerInput";
 import { site } from "@/lib/content";
 import "./globals.css";
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="type-body bg-page text-ink">
         <SceneMount />
         <PointerInput />
+        <ChapterNav />
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>

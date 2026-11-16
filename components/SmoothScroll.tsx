@@ -1,7 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { gsap, motionQueries, ScrollSmoother, ScrollTrigger, useGSAP } from "@/lib/gsap";
+import { duration, gsap, motionQueries, ScrollSmoother, ScrollTrigger, SplitText, useGSAP } from "@/lib/gsap";
+import { chapterTriggerId } from "@/lib/jump";
 import { store } from "@/lib/store";
 
 export function SmoothScroll({ children }: { children: ReactNode }) {
@@ -13,18 +14,61 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
       store.reducedMotion = reduced;
       document.documentElement.dataset.motion = reduced ? "reduced" : "full";
 
+      const pinned = reduced ? [] : gsap.utils.toArray<HTMLElement>("[data-pin]");
+      let alive = true;
+
       if (!reduced) {
         ScrollSmoother.create({
           wrapper: "#smooth-wrapper",
           content: "#smooth-content",
           smooth: 1.1,
         });
+
+        // The attribute turns a chapter's flow layout into a one-screen frame
+        // (`in-data-pinned:` utilities); the frame inside it is what stays put.
+        pinned.forEach((chapter) => {
+          chapter.dataset.pinned = "";
+          ScrollTrigger.create({
+            trigger: chapter.firstElementChild,
+            pin: true,
+            start: "top top",
+            end: () => `+=${Number(chapter.dataset.pin) * window.innerHeight}`,
+          });
+        });
+
+        // Lines rise out of a mask like a liquid level. Splitting waits for
+        // the fonts so the line breaks are the real ones.
+        void document.fonts.ready.then(() => {
+          if (!alive) return;
+          context.add(() => {
+            gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((element) => {
+              SplitText.create(element, {
+                type: "lines",
+                mask: "lines",
+                autoSplit: true,
+                onSplit: (split) =>
+                  gsap.from(split.lines, {
+                    yPercent: 105,
+                    duration: duration.slow,
+                    stagger: 0.08,
+                    scrollTrigger: { trigger: element, start: "top 88%", once: true },
+                  }),
+              });
+            });
+          });
+        });
       }
 
+      // Created after the pins, so every chapter is measured with its pin distance included.
       const page = ScrollTrigger.create({ start: 0, end: "max" });
-      const chapterTriggers = gsap.utils
-        .toArray<HTMLElement>("[data-chapter]")
-        .map((element) => ScrollTrigger.create({ trigger: element, start: "top top", end: "bottom top" }));
+      const chapterTriggers = gsap.utils.toArray<HTMLElement>("[data-chapter]").map((element) =>
+        ScrollTrigger.create({
+          id: chapterTriggerId(element.dataset.chapter ?? ""),
+          trigger: element,
+          start: "top top",
+          end: "bottom top",
+        }),
+      );
 
       let lastScroll = page.scroll();
       const readScroll = (_time: number, deltaMs: number) => {
@@ -43,7 +87,11 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
       };
       gsap.ticker.add(readScroll);
 
-      return () => gsap.ticker.remove(readScroll);
+      return () => {
+        alive = false;
+        gsap.ticker.remove(readScroll);
+        pinned.forEach((chapter) => delete chapter.dataset.pinned);
+      };
     });
   });
 

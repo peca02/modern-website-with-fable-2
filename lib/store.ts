@@ -21,8 +21,10 @@ export const store = {
     /** false until the first pointer event, and after the pointer leaves */
     active: false,
   },
-  /** 0–1, written by the field instrument */
-  field: 0,
+  /** 0–1 once the field instrument has been touched, -1 while the scroll drives the field */
+  field: -1,
+  /** 0–1, the field the scene is showing; written by the scene every frame */
+  fieldLevel: 0,
   viewport: { width: 1, height: 1 },
   /**
    * Scene points projected to the viewport for DOM labels, written every

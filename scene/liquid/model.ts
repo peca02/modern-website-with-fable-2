@@ -2,6 +2,8 @@
 // shader (as generated GLSL constants and uniforms) and by the CPU (for DOM
 // labels that follow 3D points). This file must not import three.
 
+import { beats } from "@/lib/beats";
+
 const maxBlobs = 8;
 
 export const liquidModel = {
@@ -36,7 +38,7 @@ export const liquidModel = {
     /** radius at which the local field has dropped to 1/e */
     envelope: 1.08,
     /** local field below which no spike stands */
-    critical: 0.34,
+    critical: beats.criticalField,
     height: 0.72,
     /** tangent of the cone half-angle */
     slope: 0.3,

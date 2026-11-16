@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Landscape framing: the scene moves its subject sideways, so text takes a side column. */
+@custom-variant wide (@media (min-aspect-ratio: 1/1));
+
 @theme {
   --color-*: initial;
   --color-page: #edeff1;
@@ -14,8 +17,8 @@
   --font-text: var(--font-instrument), sans-serif;
 
   --text-hero: clamp(4.5rem, 21vw, 26rem);
-  --text-display: clamp(2.75rem, 8.5vw, 9rem);
-  --text-title: clamp(1.75rem, 3.6vw, 3.5rem);
+  --text-display: clamp(2.5rem, 6vw, 7rem);
+  --text-title: clamp(1.5rem, 3.6vw, 3.5rem);
   --text-lead: clamp(1.25rem, 1.7vw, 1.75rem);
   --text-body: clamp(1rem, 1.1vw, 1.125rem);
   --text-micro: clamp(0.8125rem, 0.9vw, 0.9375rem);
@@ -91,6 +94,59 @@
     grid-template-columns: repeat(12, minmax(0, 1fr));
     column-gap: --spacing(6);
     padding-inline: --spacing(8);
+  }
+
+  @variant wide {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+}
+
+/* Letters gain mass with the field: --field runs 0–1 and defaults to full mass. */
+@utility type-mass {
+  font-weight: calc(250 + 650 * var(--field, 1));
+  font-stretch: calc(80% + 45% * var(--field, 1));
+}
+
+/* Range inputs can only be drawn through vendor pseudo-elements. */
+@utility field-range {
+  appearance: none;
+  width: 100%;
+  height: --spacing(8);
+  background: transparent;
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &::-webkit-slider-runnable-track {
+    height: --spacing(2);
+    border-radius: calc(infinity * 1px);
+    background: var(--color-ink);
+  }
+
+  &::-moz-range-track {
+    height: --spacing(2);
+    border-radius: calc(infinity * 1px);
+    background: var(--color-ink);
+  }
+
+  &::-webkit-slider-thumb {
+    appearance: none;
+    width: --spacing(8);
+    height: --spacing(8);
+    margin-top: --spacing(-3);
+    border: none;
+    border-radius: calc(infinity * 1px);
+    background: var(--color-field);
+  }
+
+  &::-moz-range-thumb {
+    width: --spacing(8);
+    height: --spacing(8);
+    border: none;
+    border-radius: calc(infinity * 1px);
+    background: var(--color-field);
   }
 }
 
