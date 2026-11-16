@@ -16,7 +16,8 @@ grani `claude/ecstatic-rubin-69cwed`."
 | 2b | All liquid states, Director (keyframe tracks), GPGPU particles, CPU model wired to DOM labels | done |
 | 3 | Chapters as semantic HTML with real copy, keyboard nav, then motion (pins, SplitText after fonts load) | done except the polish list below |
 | 4 | Preloader (`lib/loadClock.ts`), droplet cursor and goo layer, sound, grain overlay, SVG fallback | done |
-| 5 | Phone and reduced motion, full verification, OG image, icons, README, pull request, final report | **next** |
+| 5a | Visual pass: every chapter at five widths, phone, reduced motion; fix the frames | **next** |
+| 5b | Remaining checks, OG image, icons, README, pull request, final report | |
 
 ## What exists
 
@@ -112,7 +113,13 @@ grani `claude/ecstatic-rubin-69cwed`."
 npm run lint && npm run typecheck && npx next build | tail -8
 npx next start -p 3000 &
 npm run shots -- <chapter-id> <375|768|1024|1440|1920> [--reduced] [--pointer=0.5,0.45] [--touch] [--offset=0.5]
+npm run flow [-- --shots]
 ```
+
+Before every rebuild stop the old server with `pkill -f "next start"; pkill
+-f next-server`: a server left running keeps port 3000 and answers the new
+build's files with 500, so the preloader never releases. `npm run flow`
+takes several minutes here; run it once per change, not per iteration.
 
 `next dev -p 3000` is faster while iterating on a shader. `--offset` scrolls
 that many viewport heights past the chapter top; `--pointer` parks the mouse
@@ -175,6 +182,14 @@ part, hold, settle.
 - The H1 is the wordmark plus a visually hidden ": magnetic liquid, shaped
   by a field". `--text-display` was lowered to 6vw so sentence headings fit
   a side column.
+- Rules in `@layer base` lose to any utility on the same element. State that
+  must hide or show an element is a variant (`scene-live:`, `scripting:`,
+  `fine:`, `in-data-loaded:`), not a base rule.
+- GSAP time is lag-smoothed: on slow frames it runs slower than the clock.
+  Anything that must happen on time (the preloader timeout) uses
+  `setTimeout` and `performance.now()`.
+- New fixed UI: add `data-await-load` so the preloader hides it, and
+  `data-goo` if its shape should join the cursor drop (top 160px only).
 - A pinned chapter is pinned for `pin / (pin + 1)` of its story unit and
   scrolls out in the rest; the next state forms during that exit.
 
@@ -184,7 +199,9 @@ part, hold, settle.
   cursor); optional in the brief. Scroll speed does stir the surface.
 - Chapter change has no sound of its own, only the pad's pitch.
 - The fallback drawing is one static drop for every chapter.
-
+- `docs/ART_DIRECTION.md` promises more than exists: the cursor merges only
+  with the fixed controls, not with buttons in the page, and Part rows do
+  not answer hover or focus. Build it or correct the document in 5b.
 - Reach at 1024: sparse grains of the field lines still cross the left edge
   of the text column. Hold's slab is still a flat grey face with a thick
   `field` band. Crown labels overlap each other in the profile view.
@@ -195,17 +212,34 @@ part, hold, settle.
   (signature moment 4): add `store.partFocus` and swell that droplet.
 - Settle's heading is four lines at 1024.
 
-## Next step (phase 5)
+## Next step (phase 5a, then 5b in its own session)
 
-Read `PROMPT.md` lines 670–739 once. Then:
+Read `PROMPT.md` lines 670–721 once (the checklist and the quality bar).
 
-1. Screenshot every chapter at 375 `--touch` and at 1440, and each at 1024
-   `--reduced`; fix what the "Left over" list and the screenshots show
-   (start with reduced motion: states run ahead of the text).
+5a, visual pass. One chapter and one width per run; commit after each
+chapter that is fixed.
+
+1. Every chapter at 1024 `--reduced` first (states run ahead of the text),
+   then at 375 `--touch`, then 768, 1440, 1920. Fix what the screenshots and
+   the "Left over" list show. The checklist wants all five widths looked at.
+2. Seam check: sample pixels at the canvas edge and beside the liquid's
+   shadow against the page color (`#edeff1`); never done so far.
+3. Update this file and hand over 5b.
+
+5b, checks and delivery. Read `PROMPT.md` lines 722–739 first.
+
+1. Add to `scripts/flow.mjs`: lost context (`WEBGL_lose_context`), a stalled
+   load (block the scene chunk; the release must come as `without ...`),
+   reduced motion (no pin spacers, no ScrollSmoother, content complete),
+   JavaScript disabled (`javaScriptEnabled: false`: content, nav links and
+   the drawing show), one H1 and heading order.
 2. `app/opengraph-image.tsx` and `app/icon.tsx` generated in code from the
-   tokens; check the metadata output in the built HTML.
-3. Open the built page with JavaScript disabled (Playwright
-   `javaScriptEnabled: false`): content, nav links and the drawing must show.
-4. README (what it is, stack, how to run and verify, what is unverified).
-5. `npm run lint && npm run typecheck && npx next build`, `npm run flow`,
-   then the pull request to `main` and the final report to the owner.
+   tokens; check the metadata in the built HTML.
+3. `README.md`: what it is, how to run, structure, scripts.
+4. Self-check: read `PROMPT.md` lines 53–178 (the hard rules) once and
+   compare with the repository; the version table in `CLAUDE.md`; whether
+   `CLAUDE.md` and `docs/ART_DIRECTION.md` match what was built.
+5. lint, typecheck, build, `npm run flow`; the pull request into `main`
+   (summary, how to run, what was verified); the final report in Serbian
+   (done, verified and how, not verified and why, what is weaker than
+   wanted, where the author credit goes: `lib/content.ts`).
