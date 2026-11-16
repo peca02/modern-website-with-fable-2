@@ -72,8 +72,8 @@ export const part = {
   heading: "It parts, and every bead is whole.",
   body: "Pulled from several sides, one body becomes four. What Tarn makes divides the same way.",
   items: [
-    { name: "Fluids", line: "Particle, coating and carrier, mixed for how the surface should move." },
-    { name: "Fields", line: "Magnet arrays and coils that decide where the liquid stands." },
+    { name: "Fluids", line: "Particle and carrier, mixed for how the surface moves." },
+    { name: "Fields", line: "Magnets and coils that decide where it stands." },
     { name: "Vessels", line: "Glass and steel made to show a surface, not to hide it." },
     { name: "Commissions", line: "Single pieces for rooms, stages and instruments." },
   ],
