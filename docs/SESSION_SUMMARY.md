@@ -5,7 +5,11 @@ Branch: `claude/ecstatic-rubin-69cwed` (all work so far). Rewritten each session
 Line for the owner to paste into the next session: "Prethodni rad je na grani
 `claude/ecstatic-rubin-69cwed`. Prvo uradi `git fetch origin` i
 `git merge --ff-only origin/claude/ecstatic-rubin-69cwed`, pa tek onda
-pročitaj CLAUDE.md, docs/SESSION_SUMMARY.md i docs/ART_DIRECTION.md i nastavi."
+pročitaj CLAUDE.md, docs/SESSION_SUMMARY.md i docs/ART_DIRECTION.md i nastavi
+sa fazom 6a."
+
+If the phase table below does not show 6a as next, the checkout is stale:
+fast-forward before doing anything else.
 
 ## Phases (one session each, merge two if a phase turns out small)
 
@@ -19,6 +23,8 @@ pročitaj CLAUDE.md, docs/SESSION_SUMMARY.md i docs/ART_DIRECTION.md i nastavi."
 | 4 | Preloader (`lib/loadClock.ts`), droplet cursor and goo layer, sound, grain overlay, SVG fallback | done |
 | 5a | Visual pass: every chapter at five widths, phone, reduced motion; fix the frames | done |
 | 5b | Rest of the widths, remaining checks, OG image, icons, README, pull request, final report | done |
+| 6a | Polish, part one: Part rows and droplets answer each other, press and hold, the Hold slab | **next** |
+| 6b | Polish, part two: settled wide frames, small framing fixes, OG wordmark in Archivo, PR text, final report | after 6a |
 
 ## What exists
 
@@ -227,28 +233,85 @@ part, hold, settle.
 - A pinned chapter is pinned for `pin / (pin + 1)` of its story unit and
   scrolls out in the rest; the next state forms during that exit.
 
-## Left over
+## Owner decisions (after phase 5b)
 
-- Part at 768: the grain rings end about 13px from the right edge; the
-  heading is small there.
-- Part at 1440: the "Commissions" heading ends a few pixels from the grain ring.
-- Hold's slab face is still an even dark grey (a vertical mirror facing a
-  pale room); the bent `field` strip is the only event on it.
-- Crown at 1024 `--reduced`: the lattice grains reach the right end of the
-  field instrument's readout.
-- Settle on a phone: the pool is wider than the screen and reads as a band.
-- Press and hold does nothing yet (`store.pointer.down` is only used by the
-  cursor); optional in the brief. Scroll speed does stir the surface.
-- Chapter change has no sound of its own, only the pad's pitch.
-- The fallback drawing is one static drop for every chapter.
-- Part rows do not answer hover or focus and the cursor merges only with the
-  fixed controls; `docs/ART_DIRECTION.md` now says so.
-- The social image sets the wordmark in the renderer's light built-in face,
-  not Archivo.
-- Settle's heading is four lines at 1024.
+- The owner looked at the site on a real device and said it looks fine; no
+  remarks on speed, motion or sound. Nothing here was measured.
+- Hold: keep the slab and fix it (do not replace the form).
+- Build both missing interactions: Part rows with their droplets, and press
+  and hold.
+- Social image: fetch Archivo while building (an approved exception to
+  "fonts only through `next/font`", for `app/opengraph-image.tsx` only).
+- Pull request peca02/modern-website-with-fable-2#1 into `main` stays open;
+  commits pushed to this branch join it. Do not open a second one.
 
-## Next step
+## Next step (phase 6a)
 
-All phases are done and the pull request into `main` is open. Further work
-is optional polish from "Left over", or changes the owner asks for. The
-author credit is the placeholder in `lib/content.ts` (`credit`).
+One step at a time; commit and push after each. Look at every changed frame
+at 1024 and at 375 `--touch` before moving on.
+
+1. **Part rows and droplets** (signature moment 4). Add `store.partFocus`
+   (-1 or a row index). `components/PartList.tsx` sets it on pointer enter
+   and leave of a row; `scene/liquid/Liquid.tsx` also sets it when the
+   pointer ray is nearest one droplet, so it works from both sides. The
+   focused droplet swells and lifts a little (in `scene/liquid/poses.ts`,
+   part pose) and its grain ring tightens; the row shows it in the DOM with
+   one quiet change (for example the name in `field`). Eased, `settle`. Rows
+   are not controls: no `tabindex`, no roles. Touch: a tap on a row is enough.
+2. **Press and hold.** `store.pointer.down` exists and is only read by the
+   cursor. While held, the liquid under the pointer gathers and raises a
+   cusp toward it (the Reach idea, local and small), released with the
+   `tension` ease; the drone, if on, rises with it. It must work in Still
+   and must not fight the Crown field or the pinned poses: scale it by how
+   close the pose is to rest. Touch must still scroll: never
+   `preventDefault` on touch start, and ignore a press that turns into a scroll.
+3. **Hold slab.** The face is an even dark grey with one bent `field` strip,
+   and the grain frame on the floor is a thin black outline, which the art
+   direction forbids (no hairlines). Give the face a real picture of the
+   studio (soft box and wordmark panel, as on the drop: see how the analytic
+   studio is sampled in `scene/liquid/shaders.ts`; a flat face mirrors one
+   direction, so bow it more or tilt the slab until the lights land on it)
+   and turn the frame into a dense band of grains with soft edges
+   (`scene/grains/shaders.ts`, frame shape). Compare with the bridge and the
+   spiked sphere so the three forms have equal weight (`--offset` 0.4, 1.2, 1.8).
+4. Add a flow check for each new interaction (`scripts/flow.mjs`), restore
+   the promises in `docs/ART_DIRECTION.md` (signature moments 4 and 5 were
+   cut back to what existed), update this file, hand over to 6b.
+
+## Phase 6b
+
+1. **Settled wide frames.** At 1440 and 1920 every shot caught headings
+   mid-reveal, so the settled text over the scene was never seen there.
+   Make `scripts/shots.mjs` wait until no `[data-reveal]` line in the
+   viewport is still moving (poll, up to 60 s), then look again at all six
+   chapters at 1440 and at 1920 and fix overlaps between text and subject.
+2. **Crown labels.** The three pills sit on top of neighbouring spikes and
+   one is cut by them. Offset each label away from the crown with a short
+   solid lead (not a hairline) or place them on the outer side of the tip;
+   check 375, 1024, 1920 (`components/SpikeLabels.tsx`).
+3. **Small framing fixes** (`scene/direction.ts`, `lib/content.ts`):
+   - Settle on a phone: the pool is wider than the screen and reads as a
+     band. `tallFill` only matters below 0.286 at 375x812; try 0.2.
+   - Part at 768: grain rings end about 13px from the right edge (`tallX`
+     is shared with the phone; it may need to ease with the aspect); the
+     heading is small there.
+   - Part at 1440: "Commissions" ends a few pixels from its grain ring.
+   - Crown at 1024 `--reduced`: lattice grains reach the instrument's readout.
+   - Settle's heading is four lines at 1024 and leaves one word alone on the
+     third line at 1440: shorten the line or balance the wrap.
+4. **Social image.** In `app/opengraph-image.tsx` fetch Archivo (width 125,
+   weight 900) from Google Fonts at build time and pass it to
+   `ImageResponse`. Satori takes TTF, OTF or WOFF, not WOFF2 and not a
+   variable file: request the CSS without a browser user agent, with
+   `&text=Tarn`, and read the font URL from it. If the fetch fails, fall
+   back to the built-in face so the build never breaks. Look at the image.
+5. Optional, only if the budget allows: a sound of its own on chapter
+   change; a fallback drawing that differs per chapter.
+6. lint, typecheck, build, `npm run flow`; update the text of the open pull
+   request (what changed, what was verified) through the GitHub tools; this
+   file; the final report in Serbian.
+
+## Still unverified after 5b
+
+Real GPU frame rate as a number, real phones and touch, Safari and Firefox,
+a screen reader, the half-float path, dragging the field input by hand.

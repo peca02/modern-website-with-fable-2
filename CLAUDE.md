@@ -19,6 +19,7 @@ Deployment target: Vercel.
 | 3 chapters | 322–346, 481–494, 520–526, 580–584, 705–718 | look and seed facts, GSAP pattern, readability, chapters, quality bar |
 | 4 preloader, cursor, sound, fallbacks | 496–518, 586–602 | sound, resilience patterns, interaction, reduced motion and fallbacks |
 | 5 verification and delivery | 670–739, then 53–178 for the final self-check | checklist, quality bar, final deliverables, hard rules |
+| 6 polish | 496–518 for sound, 586–602 for interaction, only if needed | the work list is in `docs/SESSION_SUMMARY.md` |
 
 ## Language
 
@@ -119,7 +120,7 @@ The owner is on a small 5-hour usage limit. Saving tokens matters more than spee
 /app          routes, globals.css (tokens), opengraph-image.tsx, icon.tsx
 /components   DOM components (server by default)
 /scene        everything that imports three (client only, dynamically loaded)
-/lib          store, content, beats, jump, gsap, quality, loadClock, palette, audio, utils
+/lib          store, content, beats, jump, gsap, quality, loadClock, palette, audio, drop
 /hooks        custom hooks
 /types        shared types
 /scripts      dev-only verification scripts (Playwright)
@@ -169,6 +170,8 @@ Create folders only when needed. No empty directories.
 ## Typography
 
 - Fonts only through `next/font`. No CDN or external CSS.
+  One approved exception: `app/opengraph-image.tsx` may fetch Archivo while
+  building, with a fallback when the fetch fails.
 - Body line height 1.4–1.6; large text 1.1–1.3; line length 50–75 characters.
 
 ## Animation and sound
