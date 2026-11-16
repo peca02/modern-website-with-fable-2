@@ -156,16 +156,31 @@ part, hold, settle.
 
 ## Next step (phase 4)
 
-Read `PROMPT.md` lines 496–518 and 586–600 once. Then, one commit each:
+Read `PROMPT.md` lines 496–518 and 586–602 once (42 lines); nothing else
+from the brief is needed. Then, one commit each:
 
 1. Preloader: `lib/loadClock.ts` collects real progress (fonts, scene chunk,
-   shader compile, first frame); the drop's mass follows it and becomes the
-   hero subject without a cut; first-screen reveals start when it ends.
+   context, shader compile, first frame); the drop's mass follows it and
+   becomes the hero subject without a cut; first-screen reveals start when
+   it ends; it releases itself after 8–10 s no matter what. Check a refresh
+   mid-page: the scene must open in the state of the real scroll position.
 2. Goo layer and droplet cursor: one small fixed SVG-filtered layer for the
    nav pill, buttons and the cursor (fine pointers only, never hides the
    native cursor for keyboard users).
-3. Sound: Web Audio synthesis, off until a real toggle button is pressed;
-   field strength drives pitch in Crown. The toggle needs room in the nav
-   (the pill is 320px wide at 375).
-4. Grain as a DOM overlay; a static SVG fallback when WebGL 2 is missing
-   (`html[data-scene]` never becomes `ready`).
+3. Sound (`lib/audio.ts`): Web Audio synthesis, `AudioContext` created only
+   on the click of a real toggle button, gains ramped, suspended when the tab
+   is hidden. A low tone follows `store.fieldLevel`, the layer follows the
+   chapter and `store.scroll.velocity`, short ticks for UI. The toggle needs
+   room in the nav (the pill is 320px wide at 375).
+4. Scene input that is stored but not used yet: `store.pointer.down` (press
+   and hold may strengthen the field) and `store.scroll.velocity` (scroll
+   speed may agitate the surface). Both are optional in the brief; add them
+   only if they read well in a screenshot.
+5. Grain as a DOM overlay; a static SVG of the subject built from tokens
+   when WebGL 2 is missing or the context is lost (nothing listens for
+   `webglcontextlost` yet; `html[data-scene]` is `ready` only while the
+   scene runs).
+6. `scripts/flow.mjs` (Playwright): walks the preloader, the keyboard path
+   (Tab to the nav, Enter on a chapter, focus on its heading, active item)
+   and the interactions (field input, sound toggle), prints pass or fail.
+   The keyboard check of phase 3 was a throwaway script; this replaces it.

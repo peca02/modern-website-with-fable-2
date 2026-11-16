@@ -17,7 +17,7 @@ Deployment target: Vercel.
 | --- | --- | --- |
 | 2 scene | 467–479, 534–578 | scene pattern, liquid, particles, light scene |
 | 3 chapters | 322–346, 481–494, 520–526, 580–584, 705–718 | look and seed facts, GSAP pattern, readability, chapters, quality bar |
-| 4 preloader, cursor, sound, fallbacks | 496–518, 586–600 | sound, resilience patterns, interaction, reduced motion and fallbacks |
+| 4 preloader, cursor, sound, fallbacks | 496–518, 586–602 | sound, resilience patterns, interaction, reduced motion and fallbacks |
 | 5 verification and delivery | 670–739 | checklist, quality bar, final deliverables |
 
 ## Language
