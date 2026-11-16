@@ -20,6 +20,8 @@ export class LiquidMaterial extends ShaderMaterial {
         uBlobCount: { value: 0 },
         uSquash: { value: 1 },
         uBlend: { value: 0.5 },
+        uSwell: { value: 0 },
+        uSwellTime: { value: 0 },
         uPixelAngle: { value: 0.001 },
         uWordmark: { value: null },
         uWordmarkOn: { value: 0 },
@@ -39,6 +41,8 @@ export class LiquidMaterial extends ShaderMaterial {
     this.uniforms.uBlobCount.value = state.count;
     this.uniforms.uSquash.value = state.squash;
     this.uniforms.uBlend.value = state.blend;
+    this.uniforms.uSwell.value = state.swell;
+    this.uniforms.uSwellTime.value = state.swellTime;
   }
 
   setPixelAngle(angle: number) {

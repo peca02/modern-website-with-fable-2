@@ -23,6 +23,8 @@ uniform vec4 uBlobs[MAX_BLOBS];
 uniform int uBlobCount;
 uniform float uSquash;
 uniform float uBlend;
+uniform float uSwell;
+uniform float uSwellTime;
 uniform float uPixelAngle;
 uniform sampler2D uWordmark;
 uniform float uWordmarkOn;
@@ -51,7 +53,10 @@ float sdLiquid(vec3 p) {
     vec4 blob = uBlobs[i];
     d = smin(d, length(q - blob.xyz) - blob.w, uBlend);
   }
-  return d * uSquash;
+  // A slow swell far below the size of the body: it barely moves the
+  // silhouette, but reflections magnify it, and that is what reads as liquid.
+  float swell = sin(q.x * 4.2 + uSwellTime * 0.9) * sin(q.z * 3.6 - uSwellTime * 0.7) + 0.6 * sin(q.y * 5.0 + q.x * 2.0 + uSwellTime * 1.1);
+  return (d + swell * uSwell) * uSquash;
 }
 
 vec3 liquidNormal(vec3 p) {
@@ -111,7 +116,8 @@ vec3 studio(vec3 ro, vec3 rd) {
 
   vec2 uv;
   float key = panel(ro, rd, vec3(-1.4, 6.5, 0.6), vec3(1.0, 0.0, 0.0), vec3(0.0, 0.0, 1.0), vec2(3.3, 2.1), 0.45, uv);
-  col += key * 15.0;
+  // Brighter toward one end, like a real soft box seen off-axis.
+  col += key * mix(8.0, 17.0, smoothstep(0.0, 1.0, uv.x * 0.7 + uv.y * 0.3));
 
   float strip = panel(ro, rd, vec3(-6.5, 2.7, -1.2), vec3(0.0, 0.0, 1.0), UP, vec2(0.42, 2.7), 0.12, uv);
   col += strip * 11.0;

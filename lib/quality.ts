@@ -9,9 +9,9 @@ export type QualitySettings = {
 };
 
 export const qualitySettings: Record<QualityTier, QualitySettings> = {
-  0: { maxDpr: 1, raymarchSteps: 40, particleTextureSize: 64, selfReflection: false },
-  1: { maxDpr: 1.25, raymarchSteps: 56, particleTextureSize: 128, selfReflection: false },
-  2: { maxDpr: 1.5, raymarchSteps: 72, particleTextureSize: 192, selfReflection: true },
+  0: { maxDpr: 1.5, raymarchSteps: 40, particleTextureSize: 64, selfReflection: false },
+  1: { maxDpr: 1.5, raymarchSteps: 56, particleTextureSize: 128, selfReflection: false },
+  2: { maxDpr: 1.75, raymarchSteps: 72, particleTextureSize: 192, selfReflection: true },
   3: { maxDpr: 2, raymarchSteps: 96, particleTextureSize: 256, selfReflection: true },
 };
 

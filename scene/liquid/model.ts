@@ -32,6 +32,9 @@ export type LiquidState = {
   count: number;
   squash: number;
   blend: number;
+  /** amplitude and phase of the slow surface swell; the CPU field ignores it (it stays under a hundredth of a unit) */
+  swell: number;
+  swellTime: number;
 };
 
 export const liquid: LiquidState = {
@@ -39,6 +42,8 @@ export const liquid: LiquidState = {
   count: 0,
   squash: liquidModel.rest.squash,
   blend: liquidModel.rest.blend,
+  swell: 0,
+  swellTime: 0,
 };
 
 export function setBlob(state: LiquidState, index: number, x: number, y: number, z: number, radius: number) {

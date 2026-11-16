@@ -23,6 +23,8 @@ const { halfWidth, height, halfDepth } = liquidModel.bounds;
 const restingDrop = new RestingDrop();
 const pointerRay = new Vector3();
 const pull: PullTarget = { x: 0, y: 0 };
+const swell = { rest: 0.0035, stirred: 0.011, settle: 0.9 };
+let agitation = 0;
 
 export function Liquid({ tier }: { tier: QualityTier }) {
   const material = useRef<LiquidMaterial>(null);
@@ -56,7 +58,14 @@ export function Liquid({ tier }: { tier: QualityTier }) {
         pullTarget = pull;
       }
     }
-    restingDrop.update(liquid, Math.min(delta, 0.1), clock.elapsedTime, pullTarget, store.reducedMotion);
+    const step = Math.min(delta, 0.1);
+    restingDrop.update(liquid, step, clock.elapsedTime, pullTarget, store.reducedMotion);
+
+    // A fast pointer stirs the surface; it calms again within a couple of seconds.
+    const speed = pullTarget ? Math.min(Math.hypot(store.pointer.vx, store.pointer.vy), 1) : 0;
+    agitation = Math.max(speed, agitation * Math.exp(-step * swell.settle));
+    liquid.swell = store.reducedMotion ? 0 : swell.rest + (swell.stirred - swell.rest) * agitation;
+    liquid.swellTime = clock.elapsedTime;
 
     target.syncState(liquid);
     target.setWordmark(wordmark.current);

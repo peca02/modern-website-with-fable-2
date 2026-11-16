@@ -108,9 +108,14 @@ Total scroll length: about nine to ten viewport heights.
 ## Scene decisions
 
 - Liquid: raymarched SDF (smooth-min metaballs, hex lattice of cones for
-  spikes). Displaced mesh only if the SDF fails on look or cost at the lowest tier.
-- Environment: analytic studio in GLSL (soft boxes, horizon gradient, one
-  `field` strip, wordmark canvas texture). No Drei `Environment`.
+  spikes). Decided in phase 2a: it passed on look and on cost at the lowest
+  tier, so the displaced mesh was not prototyped.
+- Surface: black body, Fresnel with F0 0.075, no diffuse. A slow swell of a
+  few thousandths of a unit keeps the reflections moving.
+- Environment: analytic studio in GLSL. The room is dark so the silhouette
+  stays black on the light page; a lit wall behind the camera draws the soft
+  band at the equator; key soft box above, white strip left, one thin `field`
+  strip right, wordmark panel behind the camera. No Drei `Environment`.
 - Transparent canvas; contact shadow is alpha. No post-processing passes.
 - Particles: GPGPU dark round grains, normal blending, depth-tested against
   the liquid's `gl_FragDepth`.
