@@ -75,17 +75,20 @@ part, hold, settle.
 - ScrollSmoother active in full motion, absent with reduced motion
   (`html[data-motion]`); `story` and the pointer reach the scene.
 - Tailwind's `in-data-pinned:` variant compiles in 4.3.5 (for phase 3 pins).
-- Hero looked at by screenshot at 1440 (idle, pointer lean, reduced motion)
-  and 375 (desktop tier and `--touch` tier 0). The wordmark reads in the
+- Hero looked at by screenshot at 1440 (idle, pointer lean) and 375 (desktop
+  tier and `--touch` tier 0, before its DPR cap was raised). Reduced motion
+  at 1440 ran without console errors; its image was not looked at. The wordmark reads in the
   reflection; the page color is untouched outside the shadow (pixel sampled).
 - Cost, relative only (SwiftShader, CPU): 16 fps at 1440x900, 40 fps at tier
   0 on 375x812. The SDF passed on look and cost; no displaced mesh needed.
-- Not verified: real GPU frame rate, real phones, Safari.
+- Not verified: real GPU frame rate, real phones, Safari. Self-reflection
+  compiles but has never had concave geometry to show; judge it in Crown.
 
 ## Notes
 
-- Owner feedback from phase 1: the placeholder looked crude. The liquid's
-  look is the main expectation; the owner has not yet seen the 2a result.
+- The owner saw the 2a hero screenshots and approved the look of the liquid
+  (shape, gloss, wordmark in the reflection). Keep it as the reference: new
+  states must not change the hero frame or the studio without a reason.
 - GLSL reserved words bit once (`cast`); `sign` is a builtin. Check new names.
 - Tier DPR caps were raised (1.5 / 1.5 / 1.75 / 2): DPR 1 looked soft on a
   3x phone and the raymarch is cheap at that size.
@@ -98,8 +101,11 @@ part, hold, settle.
 
 ## Next step (phase 2b)
 
-Read `PROMPT.md` lines 467–479 and 534–578 only if needed. Then, in order,
-one screenshot-verified step at a time:
+`PROMPT.md` is not needed to start: this file and `docs/ART_DIRECTION.md`
+(chapters table, signature moments, scene decisions) carry the brief for 2b.
+Open lines 467–479 and 534–578 only if a rule is unclear. 2b is the largest
+phase: commit after every state, and hand over after step 2 if the session
+has grown. In order, one screenshot-verified step at a time:
 
 1. Director: keyframe tracks over `store.story` for camera, lens shift and a
    state weight per chapter; `restingDrop` becomes one state among several
