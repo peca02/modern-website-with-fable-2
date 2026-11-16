@@ -117,7 +117,7 @@ The owner is on a small 5-hour usage limit. Saving tokens matters more than spee
 /app          routes, globals.css (tokens), opengraph-image.tsx, icon.tsx
 /components   DOM components (server by default)
 /scene        everything that imports three (client only, dynamically loaded)
-/lib          store, content, gsap, quality, loadClock, palette, audio, utils
+/lib          store, content, beats, jump, gsap, quality, loadClock, palette, audio, utils
 /hooks        custom hooks
 /types        shared types
 /scripts      dev-only verification scripts (Playwright)

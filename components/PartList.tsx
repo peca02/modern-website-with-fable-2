@@ -5,21 +5,18 @@ import { useTicker } from "@/hooks/useTicker";
 import { part } from "@/lib/content";
 import { store } from "@/lib/store";
 
-// A plain list in the flow. While the chapter is pinned on a landscape screen
-// each row moves to the height of its droplet in the scene.
+// A plain list in the flow. While the chapter is pinned each row moves to the
+// height of its droplet in the scene.
 export function PartList() {
   const list = useRef<HTMLUListElement>(null);
   const offsets = useRef([0, 0, 0, 0]);
   const resting = useRef(true);
-  const landscape = useRef<MediaQueryList | null>(null);
 
   useTicker(() => {
     const root = list.current;
     if (!root) return;
-    landscape.current ??= window.matchMedia("(min-aspect-ratio: 1/1)");
     const frame = root.offsetParent;
-    const following =
-      store.story > 2.7 && store.story < 4.3 && landscape.current.matches && root.closest("[data-pinned]") !== null;
+    const following = store.story > 2.7 && store.story < 4.3 && root.closest("[data-pinned]") !== null;
     if (!frame || (!following && resting.current)) return;
 
     const top = following ? frame.getBoundingClientRect().top : 0;
@@ -42,7 +39,7 @@ export function PartList() {
   return (
     <ul
       ref={list}
-      className="col-span-3 flex flex-col gap-6 md:col-span-6 wide:col-span-3 wide:col-start-6 wide:text-right"
+      className="col-span-3 flex flex-col gap-6 pr-8 md:col-span-6 wide:col-span-3 wide:col-start-6 wide:text-right"
     >
       {part.items.map((item) => (
         <li key={item.name} className="flex flex-col gap-1">
