@@ -128,6 +128,27 @@ const tracks = {
   grains: [[0.25, 0], [0.9, 0.7], [4.7, 0.7], [4.95, 0.1]],
 } satisfies Record<string, readonly NumberKey[]>;
 
+// Without pins a chapter is one screen long, so the scroll track would show
+// each state only while its text is already leaving. Each chapter instead
+// plays its own stretch of the story over the first part of its scroll and
+// travels to the next chapter's stretch in the rest.
+const unpinnedStretches: readonly (readonly [from: number, to: number])[] = [
+  [0, 0.2],
+  [1.1, 1.45],
+  [2.4, 2.6],
+  [3.2, 3.55],
+  [4.1, 4.66],
+  [5, 5],
+];
+const unpinnedShare = 0.45;
+
+export function unpinnedStory(chapter: number, progress: number) {
+  const [from, to] = unpinnedStretches[Math.min(chapter, unpinnedStretches.length - 1)];
+  const next = unpinnedStretches[Math.min(chapter + 1, unpinnedStretches.length - 1)][0];
+  if (progress < unpinnedShare) return from + (to - from) * (progress / unpinnedShare);
+  return to + (next - to) * ((progress - unpinnedShare) / (1 - unpinnedShare));
+}
+
 const shotSegment: Segment = { from: 0, to: 0, mix: 0 };
 const poseSegment: Segment = { from: 0, to: 0, mix: 0 };
 const grainSegment: Segment = { from: 0, to: 0, mix: 0 };

@@ -5,6 +5,7 @@ import { duration, gsap, motionQueries, ScrollSmoother, ScrollTrigger, SplitText
 import { chapterTriggerId } from "@/lib/jump";
 import { whenReleased } from "@/lib/loadClock";
 import { store } from "@/lib/store";
+import { unpinnedStory } from "@/scene/direction";
 
 const scrollKey = "tarn:scroll";
 
@@ -109,7 +110,9 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
 
         let story = 0;
         chapterTriggers.forEach((trigger, index) => {
-          if (trigger.progress > 0) story = index + trigger.progress;
+          if (trigger.progress > 0) {
+            story = reduced ? unpinnedStory(index, trigger.progress) : index + trigger.progress;
+          }
         });
         store.story = story;
       };
