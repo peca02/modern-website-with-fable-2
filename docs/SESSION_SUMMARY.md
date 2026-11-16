@@ -51,6 +51,12 @@ Branch: `claude/ecstatic-rubin-69cwed` (all work so far). Rewritten each session
 - Not yet done: nav, real copy, pins, preloader hook (`lib/loadClock.ts`),
   seam check by pixel sampling (do it once the liquid draws a shadow).
 
+## When to open PROMPT.md
+
+Not needed for phase 2a/2b beyond sections 10.1–10.3 (liquid, particles,
+light scene) if a detail is missing here. Phase 5 needs section 13
+(verification checklist) and section 15 (final deliverables).
+
 ## Next step (phase 2a)
 
 Create `scene/liquid/`: a shared model module (blob centres, radii, lattice

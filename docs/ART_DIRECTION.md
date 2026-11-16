@@ -65,6 +65,19 @@ vocabulary, no hype, no invented product facts.
 | 5 | Hold | holds three designed forms: capillary bridge, slab with an edge, spiked sphere | pinned | subject centre |
 | 6 | Settle | field gone; wide calm pool | flow | pool along the bottom, text above |
 
+## Signature moments
+
+1. Preloader: real loading progress is the mass of a growing drop, which
+   becomes the hero subject without a cut.
+2. The wordmark is drawn to a canvas texture and placed as a light in the
+   studio, so it reads in the liquid's reflection.
+3. Crown: spikes rise with scroll, DOM labels follow real spike tips, and a
+   real `<input type="range">` drives the field (and pitch when sound is on).
+   Headline letters gain mass with the field.
+4. Part: droplets line up with the rows of a DOM list (what Tarn makes:
+   fluids, fields, vessels, commissions) and answer hover and focus.
+5. A droplet cursor that stretches with speed and merges with buttons.
+
 ## Framing rules
 
 - Dark text never overlaps the black subject unless the moment is designed.
