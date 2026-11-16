@@ -6,6 +6,17 @@
 /* The preloader hides content only where scripts can show it again. */
 @custom-variant scripting (@media (scripting: enabled));
 
+/* Scripts are on and the scene has not failed, so the scene (or its preloader) owns the frame. */
+@custom-variant scene-live {
+  @media (scripting: enabled) {
+    html:not([data-scene="fallback"]) & {
+      @slot;
+    }
+  }
+}
+
+@custom-variant fine (@media (hover: hover) and (pointer: fine));
+
 @theme {
   --color-*: initial;
   --color-page: #edeff1;
@@ -102,6 +113,11 @@
   @variant wide {
     grid-template-columns: repeat(12, minmax(0, 1fr));
   }
+}
+
+/* Shapes inside join with a meniscus; the filter lives in DropletCursor. */
+@utility goo {
+  filter: url("#goo");
 }
 
 /* Letters gain mass with the field: --field runs 0–1 and defaults to full mass. */

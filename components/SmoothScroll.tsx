@@ -6,8 +6,11 @@ import { chapterTriggerId } from "@/lib/jump";
 import { whenReleased } from "@/lib/loadClock";
 import { store } from "@/lib/store";
 
+const scrollKey = "tarn:scroll";
+
 export function SmoothScroll({ children }: { children: ReactNode }) {
   useGSAP(() => {
+    window.history.scrollRestoration = "manual";
     const mm = gsap.matchMedia();
 
     mm.add(motionQueries, (context) => {
@@ -23,6 +26,9 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
           wrapper: "#smooth-wrapper",
           content: "#smooth-content",
           smooth: 1.1,
+          // ScrollSmoother centres whatever receives focus. Headings are only
+          // focused by a chapter jump, which has already placed the scroll.
+          onFocusIn: (_self, event) => !(event.target instanceof HTMLElement && event.target.tabIndex < 0),
         });
 
         // The attribute turns a chapter's flow layout into a one-screen frame
@@ -58,6 +64,12 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
               });
             });
           });
+          // Fonts and line masks have moved the chapters since they were measured.
+          ScrollTrigger.refresh();
+        });
+      } else {
+        void document.fonts.ready.then(() => {
+          if (alive) ScrollTrigger.refresh();
         });
       }
 
@@ -71,6 +83,20 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
           end: "bottom top",
         }),
       );
+
+      // The browser restores the scroll position before the pins lengthen the
+      // page, which clamps it; put the saved one back now that they exist.
+      const [navigation] = performance.getEntriesByType("navigation");
+      const saved = Number(window.sessionStorage.getItem(scrollKey));
+      const returning = navigation instanceof PerformanceNavigationTiming && navigation.type !== "navigate";
+      if (returning && saved > 0) {
+        ScrollTrigger.refresh();
+        window.scrollTo(0, saved);
+        ScrollSmoother.get()?.scrollTop(saved);
+        ScrollTrigger.update();
+      }
+      const saveScroll = () => window.sessionStorage.setItem(scrollKey, String(Math.round(window.scrollY)));
+      window.addEventListener("pagehide", saveScroll);
 
       let lastScroll = page.scroll();
       const readScroll = (_time: number, deltaMs: number) => {
@@ -92,6 +118,7 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
       return () => {
         alive = false;
         gsap.ticker.remove(readScroll);
+        window.removeEventListener("pagehide", saveScroll);
         pinned.forEach((chapter) => delete chapter.dataset.pinned);
       };
     });

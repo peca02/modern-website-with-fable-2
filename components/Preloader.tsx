@@ -13,16 +13,20 @@ const timeoutSeconds = 9;
 export function Preloader() {
   const readout = useRef<HTMLSpanElement>(null);
   const shown = useRef(-1);
+  const lastTick = useRef(0);
 
   useGSAP(() => {
     void document.fonts.ready.then(() => markLoaded("fonts"));
-    const timeout = gsap.delayedCall(timeoutSeconds, finishLoading);
-    return () => timeout.kill();
+    // Wall clock on purpose: GSAP's own time slows down when frames are slow.
+    const timeout = window.setTimeout(finishLoading, timeoutSeconds * 1000);
+    return () => window.clearTimeout(timeout);
   });
 
   useTicker(() => {
     if (loadClock.released) return;
-    const step = Math.min(gsap.ticker.deltaRatio() / 60, 0.1);
+    const now = performance.now();
+    const step = Math.min((now - (lastTick.current || now)) / 1000, 0.5);
+    lastTick.current = now;
     loadClock.mass = store.reducedMotion
       ? loadClock.progress
       : loadClock.mass + (loadClock.progress - loadClock.mass) * (1 - Math.exp(-step * follow));

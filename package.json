@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "shots": "node scripts/shots.mjs"
+    "shots": "node scripts/shots.mjs",
+    "flow": "node scripts/flow.mjs"
   },
   "dependencies": {
     "@gsap/react": "2.1.2",

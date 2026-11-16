@@ -90,8 +90,9 @@ export function Liquid({ tier }: { tier: QualityTier }) {
       mixPoses(liquid.pose, poseFrom, poseTo, direction.poseMix);
     }
 
-    // A fast pointer stirs the surface; it calms again within a couple of seconds.
-    const speed = pullTarget ? Math.min(Math.hypot(store.pointer.vx, store.pointer.vy), 1) : 0;
+    // A fast pointer or a fast scroll stirs the surface; it calms again within a couple of seconds.
+    const stir = pullTarget ? Math.hypot(store.pointer.vx, store.pointer.vy) : 0;
+    const speed = Math.min(Math.max(stir, Math.abs(store.scroll.velocity) * 0.4), 1);
     agitation = Math.max(speed, agitation * Math.exp(-step * swell.settle));
     liquid.swell = store.reducedMotion ? 0 : swell.rest + (swell.stirred - swell.rest) * agitation;
     liquid.swellTime = clock.elapsedTime;

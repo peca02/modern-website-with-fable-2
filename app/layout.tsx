@@ -1,9 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, Instrument_Sans } from "next/font/google";
 import type { ReactNode } from "react";
+import { SceneFallback } from "@/components/SceneFallback";
 import { SceneMount } from "@/components/SceneMount";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { ChapterNav } from "@/components/ChapterNav";
+import { DropletCursor } from "@/components/DropletCursor";
+import { GrainOverlay } from "@/components/GrainOverlay";
 import { PointerInput } from "@/components/PointerInput";
 import { Preloader } from "@/components/Preloader";
 import { site } from "@/lib/content";
@@ -38,11 +41,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${archivo.variable} ${instrument.variable}`}>
       <body className="type-body bg-page text-ink">
+        <SceneFallback />
         <SceneMount />
         <PointerInput />
         <Preloader />
+        <DropletCursor />
         <ChapterNav />
         <SmoothScroll>{children}</SmoothScroll>
+        <GrainOverlay />
       </body>
     </html>
   );

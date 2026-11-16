@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { ChapterLink } from "@/components/ChapterLink";
+import { SoundToggle } from "@/components/SoundToggle";
 import { useTicker } from "@/hooks/useTicker";
 import { navigation } from "@/lib/content";
 import { ScrollTrigger } from "@/lib/gsap";
@@ -27,23 +28,25 @@ export function ChapterNav() {
   });
 
   return (
-    <nav
-      aria-label={navigation.label}
+    <div
       data-await-load=""
-      className="pointer-events-none fixed inset-x-4 top-4 z-20 flex justify-center md:inset-x-8 md:top-6 md:justify-end"
+      className="pointer-events-none fixed inset-x-4 top-4 z-20 flex justify-center gap-2 md:inset-x-8 md:top-6 md:justify-end"
     >
-      <ul ref={list} className="pointer-events-auto flex gap-1 rounded-full bg-ink p-1">
-        {navigation.items.map((item) => (
-          <li key={item.id}>
-            <ChapterLink
-              id={item.id}
-              className="type-micro block rounded-full px-2.5 py-2.5 text-chalk transition-colors duration-200 ease-settle hover:text-mineral aria-[current]:bg-field aria-[current]:hover:text-chalk md:px-4"
-            >
-              {item.name}
-            </ChapterLink>
-          </li>
-        ))}
-      </ul>
-    </nav>
+      <nav aria-label={navigation.label}>
+        <ul ref={list} data-goo="" className="pointer-events-auto flex gap-1 rounded-full bg-ink p-1">
+          {navigation.items.map((item) => (
+            <li key={item.id}>
+              <ChapterLink
+                id={item.id}
+                className="type-micro block rounded-full px-2.5 py-2.5 text-chalk transition-colors duration-200 ease-settle hover:text-mineral aria-[current]:bg-field aria-[current]:hover:text-chalk md:px-4"
+              >
+                {item.name}
+              </ChapterLink>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <SoundToggle />
+    </div>
   );
 }

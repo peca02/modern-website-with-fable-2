@@ -32,6 +32,10 @@ export const preloader = {
   unit: "%",
 } as const;
 
+export const sound = {
+  label: "Sound",
+} as const;
+
 export const still = {
   id: "still",
   headingSuffix: "magnetic liquid, shaped by a field",

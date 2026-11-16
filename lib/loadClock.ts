@@ -24,6 +24,8 @@ export const loadClock = {
   /** 0 while the drop is centred as the preloader, 1 in the chapter's own framing */
   settle: 0,
   released: false,
+  /** phases that never reported before the preloader gave up on them */
+  skipped: "",
 };
 
 export function markLoaded(phase: LoadPhase) {
@@ -33,6 +35,7 @@ export function markLoaded(phase: LoadPhase) {
 
 /** Gives up on whatever has not reported: a timeout or a scene that cannot start. */
 export function finishLoading() {
+  loadClock.skipped = [...pending].join(" ");
   pending.clear();
   loadClock.progress = 1;
 }
@@ -40,7 +43,7 @@ export function finishLoading() {
 export function releaseLoad() {
   if (loadClock.released) return;
   loadClock.released = true;
-  document.documentElement.dataset.loaded = "";
+  document.documentElement.dataset.loaded = loadClock.skipped ? `without ${loadClock.skipped}` : "complete";
   release();
 }
 

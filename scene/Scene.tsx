@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { PerformanceMonitor } from "@react-three/drei";
-import { markLoaded } from "@/lib/loadClock";
+import { finishLoading, markLoaded } from "@/lib/loadClock";
 import { lowerTier, pickInitialTier, qualitySettings, type QualityTier } from "@/lib/quality";
 import { store } from "@/lib/store";
 import { Director } from "@/scene/Director";
@@ -26,8 +26,20 @@ function FirstFrame() {
   return null;
 }
 
+function hasWebGL2() {
+  return document.createElement("canvas").getContext("webgl2") !== null;
+}
+
 export function Scene() {
   const [tier, setTier] = useState(initialTier);
+  const [available, setAvailable] = useState(hasWebGL2);
+
+  useEffect(() => {
+    if (available) return;
+    // The drawing in SceneFallback takes over, and the preloader stops waiting.
+    document.documentElement.dataset.scene = "fallback";
+    finishLoading();
+  }, [available]);
   const settings = qualitySettings[tier];
 
   const decline = () => {
@@ -35,6 +47,8 @@ export function Scene() {
     store.quality = next;
     setTier(next);
   };
+
+  if (!available) return null;
 
   return (
     <Canvas
@@ -46,6 +60,7 @@ export function Scene() {
         gl.compile(scene, camera);
         markLoaded("shaders");
         document.documentElement.dataset.scene = "ready";
+        gl.domElement.addEventListener("webglcontextlost", () => setAvailable(false), { once: true });
       }}
     >
       <PerformanceMonitor onDecline={decline} />
