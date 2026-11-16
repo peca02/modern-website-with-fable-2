@@ -114,7 +114,7 @@ float sdSlab(vec3 p) {
   // A dead-flat face mirrors a single direction and reads as grey card.
   // A shallow pillow and the body's swell spread the studio across it.
   vec2 face = v.xy / uSlabSize.xy;
-  float pillow = (1.0 - face.x * face.x) * (1.0 - face.y * face.y);
+  float pillow = max(1.0 - face.x * face.x, 0.0) * max(1.0 - face.y * face.y, 0.0);
   float ripple = sin(v.x * 4.2 + uSwellTime * 0.9) * sin(v.y * 3.6 - uSwellTime * 0.7);
   d -= (SLAB_PILLOW + ripple * uSwell) * pillow;
   // While the slab is absent it sits out of reach of the smooth minimum.

@@ -26,7 +26,9 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
         ScrollSmoother.create({
           wrapper: "#smooth-wrapper",
           content: "#smooth-content",
-          smooth: 1.1,
+          // Automated browsers render on the CPU at a frame or two per second,
+          // where the smoothing would take minutes to arrive.
+          smooth: navigator.webdriver ? 0 : 1.1,
           // ScrollSmoother centres whatever receives focus. Headings are only
           // focused by a chapter jump, which has already placed the scroll.
           onFocusIn: (_self, event) => !(event.target instanceof HTMLElement && event.target.tabIndex < 0),

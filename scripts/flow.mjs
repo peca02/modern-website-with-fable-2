@@ -106,7 +106,8 @@ const audio = await page.evaluate(() => ({ count: window.audioContexts.length, s
 check("sound: toggle creates one running AudioContext", audio.count === 1 && audio.state === "running", JSON.stringify(audio));
 check("sound: toggle is pressed", (await toggle.getAttribute("aria-pressed")) === "true");
 await toggle.click();
-await page.waitForTimeout(2000);
+// The context suspends after the fade-out; timers run late on a slow machine.
+await page.waitForFunction(() => window.audioContexts[0]?.state === "suspended", null, { timeout: 10000 }).catch(() => {});
 const stopped = await page.evaluate(() => window.audioContexts[0]?.state);
 check("sound: off suspends the context", stopped === "suspended", String(stopped));
 

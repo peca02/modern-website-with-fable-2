@@ -36,7 +36,7 @@ const sceneReady = await page
   .catch(() => false);
 await page.evaluate(() => document.fonts.ready);
 const loaded = await page
-  .waitForSelector("html[data-loaded]", { timeout: 20000 })
+  .waitForSelector("html[data-loaded]", { timeout: 60000 })
   .then(() => true)
   .catch(() => false);
 // ScrollSmoother fixes the wrapper, so scrollIntoView does nothing; scroll the window instead.
@@ -51,7 +51,8 @@ if (pointer) {
   const size = page.viewportSize();
   await page.mouse.move(pointer[0] * size.width, pointer[1] * size.height, { steps: 4 });
 }
-await page.waitForTimeout(2500);
+// Reveals and scene eases run on GSAP time, which slows down with the frame rate.
+await page.waitForTimeout(width > 1024 ? 12000 : 4000);
 
 // Relative only: headless Chromium renders on the CPU (SwiftShader).
 const fps = await page.evaluate(

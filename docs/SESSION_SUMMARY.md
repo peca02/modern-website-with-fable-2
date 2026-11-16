@@ -16,8 +16,8 @@ grani `claude/ecstatic-rubin-69cwed`."
 | 2b | All liquid states, Director (keyframe tracks), GPGPU particles, CPU model wired to DOM labels | done |
 | 3 | Chapters as semantic HTML with real copy, keyboard nav, then motion (pins, SplitText after fonts load) | done except the polish list below |
 | 4 | Preloader (`lib/loadClock.ts`), droplet cursor and goo layer, sound, grain overlay, SVG fallback | done |
-| 5a | Visual pass: every chapter at five widths, phone, reduced motion; fix the frames | **next** |
-| 5b | Remaining checks, OG image, icons, README, pull request, final report | |
+| 5a | Visual pass: every chapter at five widths, phone, reduced motion; fix the frames | done except the widths listed under "Next step" |
+| 5b | Rest of the widths, remaining checks, OG image, icons, README, pull request, final report | **next** |
 
 ## What exists
 
@@ -153,13 +153,24 @@ part, hold, settle.
   same pixel in Settle; without WebGL the drawing shows and content is
   released). Looked at: the preloader frames and the hero at 1024, the nav
   with the drop merging at 800 (2x), the hero at 375 `--touch`, the fallback.
+- Phase 5a, looked at: all six chapters at 1024 `--reduced` and at 375
+  `--touch`; crown, part, hold (slab) at 1440; part and reach at 768.
+  Fixed: without pins each chapter now shows its own scene state
+  (`unpinnedStory` in `scene/direction.ts`: crown stands, part is split, hold
+  runs its three forms inside one screen); spike labels step apart instead of
+  overlapping; the slab's faces bow slightly so the `field` strip bends
+  across them; two Part lines were shortened so phone rows are two lines.
+- Seam: hero at 1024, 16px block means in the scene region. No step between
+  canvas and page; the shadow fades smoothly but does run off the right and
+  bottom edges of the viewport there. Other chapters were not sampled.
+- `npm run flow`: 21 of 21 after these changes.
 - Not verified in phase 4: how any of the sound actually sounds (no audio
   output here), a real `webglcontextlost` (only the no-WebGL path ran), the
   cursor's stretch in motion, real load times (here the release comes about
   9 s after first paint because shaders compile on the CPU), the chapters
   other than Still since the grain and the cursor layer were added.
 - Not verified: real GPU frame rate, real phones, Safari, the half-float
-  path, 768 / 1440 / 1920 widths, the page with JavaScript off (the HTML is
+  path, 1920 at all, 768 and 1440 beyond the frames listed above, the page with JavaScript off (the HTML is
   server-rendered; not opened in a browser without scripts), dragging the
   field input by hand, a screen reader.
 
@@ -190,56 +201,57 @@ part, hold, settle.
   `setTimeout` and `performance.now()`.
 - New fixed UI: add `data-await-load` so the preloader hides it, and
   `data-goo` if its shape should join the cursor drop (top 160px only).
+- Under automation (`navigator.webdriver`) ScrollSmoother runs with
+  `smooth: 0`: at one frame per second the smoothing never arrived and shots
+  caught transitions. The shot script waits up to 60 s for the preloader and
+  12 s after the jump on wide screens; text reveals can still be caught
+  mid-mask there, which is the slow clock, not a bug.
+- SDF additions must be bounded: an unclamped product term in `sdSlab` drew
+  phantom surfaces far from the slab.
 - A pinned chapter is pinned for `pin / (pin + 1)` of its story unit and
   scrolls out in the rest; the next state forms during that exit.
 
-## Left over (do when the frame is next touched, or in phase 5)
+## Left over
 
+- Part at 768x1024: the fourth droplet is cut by the bottom edge and the
+  column touches the right edge (portrait framing was tuned at 375x812;
+  `shots.part` `tallX` / `tallY` in `scene/direction.ts`, or the Director's
+  span for less narrow portraits). The Part heading is small at 768.
+- Part at 1440: the "Commissions" heading ends a few pixels from the grain ring.
+- Hold's slab face is still an even dark grey (a vertical mirror facing a
+  pale room); the bent `field` strip is the only event on it.
+- Crown at 1024 `--reduced`: the lattice grains reach the right end of the
+  field instrument's readout.
+- Settle on a phone: the pool is wider than the screen and reads as a band.
 - Press and hold does nothing yet (`store.pointer.down` is only used by the
   cursor); optional in the brief. Scroll speed does stir the surface.
 - Chapter change has no sound of its own, only the pad's pitch.
 - The fallback drawing is one static drop for every chapter.
 - `docs/ART_DIRECTION.md` promises more than exists: the cursor merges only
   with the fixed controls, not with buttons in the page, and Part rows do
-  not answer hover or focus. Build it or correct the document in 5b.
-- Reach at 1024: sparse grains of the field lines still cross the left edge
-  of the text column. Hold's slab is still a flat grey face with a thick
-  `field` band. Crown labels overlap each other in the profile view.
-- Reduced motion: chapters are short without pins, so scene states run ahead
-  of the text and the lattice grains reach the next chapter's text.
-- Phone Part was reframed (`tallX 0.37`, rows `pr-8`) after the last
-  screenshot; look at it again. Part rows do not answer hover or focus yet
-  (signature moment 4): add `store.partFocus` and swell that droplet.
+  not answer hover or focus (signature moment 4). Build it
+  (`store.partFocus`, swell that droplet) or correct the document.
 - Settle's heading is four lines at 1024.
 
-## Next step (phase 5a, then 5b in its own session)
+## Next step (phase 5b)
 
-Read `PROMPT.md` lines 670–721 once (the checklist and the quality bar).
+Read `PROMPT.md` lines 670–739 once (checklist, quality bar, deliverables).
 
-5a, visual pass. One chapter and one width per run; commit after each
-chapter that is fixed.
-
-1. Every chapter at 1024 `--reduced` first (states run ahead of the text),
-   then at 375 `--touch`, then 768, 1440, 1920. Fix what the screenshots and
-   the "Left over" list show. The checklist wants all five widths looked at.
-2. Seam check: sample pixels at the canvas edge and beside the liquid's
-   shadow against the page color (`#edeff1`); never done so far.
-3. Update this file and hand over 5b.
-
-5b, checks and delivery. Read `PROMPT.md` lines 722–739 first.
-
-1. Add to `scripts/flow.mjs`: lost context (`WEBGL_lose_context`), a stalled
+1. Finish the widths: fix Part at 768, then look at still, crown, hold,
+   settle at 768; still, reach, settle at 1440; every chapter at 1920. Wide
+   shots take minutes each here (about 1 fps); one per run.
+2. Add to `scripts/flow.mjs`: lost context (`WEBGL_lose_context`), a stalled
    load (block the scene chunk; the release must come as `without ...`),
    reduced motion (no pin spacers, no ScrollSmoother, content complete),
    JavaScript disabled (`javaScriptEnabled: false`: content, nav links and
    the drawing show), one H1 and heading order.
-2. `app/opengraph-image.tsx` and `app/icon.tsx` generated in code from the
+3. `app/opengraph-image.tsx` and `app/icon.tsx` generated in code from the
    tokens; check the metadata in the built HTML.
-3. `README.md`: what it is, how to run, structure, scripts.
-4. Self-check: read `PROMPT.md` lines 53–178 (the hard rules) once and
+4. `README.md`: what it is, how to run, structure, scripts.
+5. Self-check: read `PROMPT.md` lines 53–178 (the hard rules) once and
    compare with the repository; the version table in `CLAUDE.md`; whether
    `CLAUDE.md` and `docs/ART_DIRECTION.md` match what was built.
-5. lint, typecheck, build, `npm run flow`; the pull request into `main`
+6. lint, typecheck, build, `npm run flow`; the pull request into `main`
    (summary, how to run, what was verified); the final report in Serbian
    (done, verified and how, not verified and why, what is weaker than
    wanted, where the author credit goes: `lib/content.ts`).
