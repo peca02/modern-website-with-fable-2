@@ -7,10 +7,6 @@ Line for the owner to paste into the next session: "Prethodni rad je na grani
 `git merge --ff-only origin/claude/ecstatic-rubin-69cwed`, pa tek onda
 pročitaj CLAUDE.md, docs/SESSION_SUMMARY.md i docs/ART_DIRECTION.md i nastavi."
 
-The 5a session opened 14 commits behind the remote branch, with a summary
-that still said phase 2a was next. If this file's phase table does not show
-5b as next, the checkout is stale: fast-forward before doing anything else.
-
 ## Phases (one session each, merge two if a phase turns out small)
 
 | Phase | Work | State |
@@ -21,8 +17,8 @@ that still said phase 2a was next. If this file's phase table does not show
 | 2b | All liquid states, Director (keyframe tracks), GPGPU particles, CPU model wired to DOM labels | done |
 | 3 | Chapters as semantic HTML with real copy, keyboard nav, then motion (pins, SplitText after fonts load) | done except the polish list below |
 | 4 | Preloader (`lib/loadClock.ts`), droplet cursor and goo layer, sound, grain overlay, SVG fallback | done |
-| 5a | Visual pass: every chapter at five widths, phone, reduced motion; fix the frames | done except the widths listed under "Next step" |
-| 5b | Rest of the widths, remaining checks, OG image, icons, README, pull request, final report | **next** |
+| 5a | Visual pass: every chapter at five widths, phone, reduced motion; fix the frames | done |
+| 5b | Rest of the widths, remaining checks, OG image, icons, README, pull request, final report | done |
 
 ## What exists
 
@@ -110,8 +106,13 @@ that still said phase 2a was next. If this file's phase table does not show
   to re-centre headings focused by a jump (`onFocusIn`).
 - `scripts/shots.mjs`: screenshots, one chapter and one width per run; prints
   fps (relative: CPU rendering) and the canvas size. `scripts/flow.mjs`
-  (`npm run flow [-- --shots]`): 21 pass/fail checks at 800x600 — preloader,
-  keyboard path, field input, sound toggle, refresh mid-page, no WebGL.
+  (`npm run flow [-- --shots]`): 38 pass/fail checks at 800x600 — preloader,
+  keyboard path, field input, sound toggle, refresh mid-page, no WebGL, lost
+  context, stalled load, reduced motion, JavaScript off, heading order.
+- `lib/drop.ts`: the drop as vector paths, shared by `SceneFallback.tsx`,
+  `app/opengraph-image.tsx` and `app/icon.tsx` (both `next/og`, built-in
+  font: no font file ships). `Shot.tallFill` in `scene/direction.ts` sizes a
+  subject on portrait screens that are not narrow (Part 0.33, Settle 0.3).
 
 ## How to verify
 
@@ -169,16 +170,23 @@ part, hold, settle.
 - Seam: hero at 1024, 16px block means in the scene region. No step between
   canvas and page; the shadow fades smoothly but does run off the right and
   bottom edges of the viewport there. Other chapters were not sampled.
-- `npm run flow`: 21 of 21 after these changes.
-- Not verified in phase 4: how any of the sound actually sounds (no audio
-  output here), a real `webglcontextlost` (only the no-WebGL path ran), the
-  cursor's stretch in motion, real load times (here the release comes about
-  9 s after first paint because shaders compile on the CPU), the chapters
-  other than Still since the grain and the cursor layer were added.
-- Not verified: real GPU frame rate, real phones, Safari, the half-float
-  path, 1920 at all, 768 and 1440 beyond the frames listed above, the page with JavaScript off (the HTML is
-  server-rendered; not opened in a browser without scripts), dragging the
-  field input by hand, a screen reader.
+- Phase 5b, looked at: still, crown, part, hold, settle at 768; still, reach,
+  settle at 1440; all six at 1920. With 5a that is every chapter at 375, 768,
+  1024, 1440 and 1920 (reach at 768 from 5a). Fixed: the Part column and the
+  Settle pool now fit a 768x1024 screen.
+- `npm run flow`: 38 of 38, including a real `webglcontextlost`, a stalled
+  scene chunk (released as `without code context shaders frame`), reduced
+  motion (no spacers, no smoother, nothing hidden) and JavaScript disabled
+  (content, six nav links, the drawing, no preloader; one h1, no skipped level).
+- Metadata in the built HTML: Open Graph and Twitter tags, the generated
+  1200x630 image and the 64px icon; both images were looked at.
+- Hard rules grep: no `any`, no suppressions, no hex in components, default
+  exports only where Next requires them, no asset files.
+- Not verified: how the sound sounds, real GPU frame rate, real phones and
+  touch, Safari and Firefox, the half-float path, dragging the field input by
+  hand, a screen reader, the cursor's stretch in motion, real load times
+  (here about 10 s because shaders compile on the CPU). Wide shots catch
+  headings mid-reveal (slow clock), so the settled text was judged at 1024.
 
 ## Notes
 
@@ -221,10 +229,8 @@ part, hold, settle.
 
 ## Left over
 
-- Part at 768x1024: the fourth droplet is cut by the bottom edge and the
-  column touches the right edge (portrait framing was tuned at 375x812;
-  `shots.part` `tallX` / `tallY` in `scene/direction.ts`, or the Director's
-  span for less narrow portraits). The Part heading is small at 768.
+- Part at 768: the grain rings end about 13px from the right edge; the
+  heading is small there.
 - Part at 1440: the "Commissions" heading ends a few pixels from the grain ring.
 - Hold's slab face is still an even dark grey (a vertical mirror facing a
   pale room); the bent `field` strip is the only event on it.
@@ -235,32 +241,14 @@ part, hold, settle.
   cursor); optional in the brief. Scroll speed does stir the surface.
 - Chapter change has no sound of its own, only the pad's pitch.
 - The fallback drawing is one static drop for every chapter.
-- `docs/ART_DIRECTION.md` promises more than exists: the cursor merges only
-  with the fixed controls, not with buttons in the page, and Part rows do
-  not answer hover or focus (signature moment 4). Build it
-  (`store.partFocus`, swell that droplet) or correct the document.
+- Part rows do not answer hover or focus and the cursor merges only with the
+  fixed controls; `docs/ART_DIRECTION.md` now says so.
+- The social image sets the wordmark in the renderer's light built-in face,
+  not Archivo.
 - Settle's heading is four lines at 1024.
 
-## Next step (phase 5b)
+## Next step
 
-Read `PROMPT.md` lines 670–739 once (checklist, quality bar, deliverables).
-
-1. Finish the widths: fix Part at 768, then look at still, crown, hold,
-   settle at 768; still, reach, settle at 1440; every chapter at 1920. Wide
-   shots take minutes each here (about 1 fps); one per run.
-2. Add to `scripts/flow.mjs`: lost context (`WEBGL_lose_context`), a stalled
-   load (block the scene chunk; the release must come as `without ...`),
-   reduced motion (no pin spacers, no ScrollSmoother, content complete),
-   JavaScript disabled (`javaScriptEnabled: false`: content, nav links and
-   the drawing show), one H1 and heading order.
-3. `app/opengraph-image.tsx` and `app/icon.tsx` generated in code from the
-   tokens; check the metadata in the built HTML.
-4. `README.md`: what it is, how to run, structure, scripts.
-5. Self-check: read `PROMPT.md` lines 53–178 (the hard rules) once and
-   compare with the repository; the version table in `CLAUDE.md`; whether
-   `CLAUDE.md` and `docs/ART_DIRECTION.md` match what was built.
-6. lint, typecheck, build, `npm run flow`; everything committed and pushed;
-   the pull request into `main`
-   (summary, how to run, what was verified); the final report in Serbian
-   (done, verified and how, not verified and why, what is weaker than
-   wanted, where the author credit goes: `lib/content.ts`).
+All phases are done and the pull request into `main` is open. Further work
+is optional polish from "Left over", or changes the owner asks for. The
+author credit is the placeholder in `lib/content.ts` (`credit`).
