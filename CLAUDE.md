@@ -124,7 +124,7 @@ The owner is on a small 5-hour usage limit. Saving tokens matters more than spee
 /hooks        custom hooks
 /types        shared types
 /scripts      dev-only verification scripts (Playwright)
-/docs         ART_DIRECTION.md, SESSION_SUMMARY.md
+/docs         ART_DIRECTION.md, SESSION_SUMMARY.md, TECH_AND_IDENTITY.md (Serbian, for the owner; sessions do not read it)
 ```
 
 Create folders only when needed. No empty directories.

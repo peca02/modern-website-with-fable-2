@@ -307,7 +307,9 @@ at 1024 and at 375 `--touch` before moving on.
    back to the built-in face so the build never breaks. Look at the image.
 5. Optional, only if the budget allows: a sound of its own on chapter
    change; a fallback drawing that differs per chapter.
-6. lint, typecheck, build, `npm run flow`; update the text of the open pull
+6. Bring `docs/TECH_AND_IDENTITY.md` (Serbian, the owner's reference for
+   future sites) in line with what phase 6 changed; a few lines.
+7. lint, typecheck, build, `npm run flow`; update the text of the open pull
    request (what changed, what was verified) through the GitHub tools; this
    file; the final report in Serbian.
 
