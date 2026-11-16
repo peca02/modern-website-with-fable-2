@@ -15,8 +15,8 @@ grani `claude/ecstatic-rubin-69cwed`."
 | 2a | Raymarched SDF liquid, shading, analytic studio, hero state, pointer | done |
 | 2b | All liquid states, Director (keyframe tracks), GPGPU particles, CPU model wired to DOM labels | done |
 | 3 | Chapters as semantic HTML with real copy, keyboard nav, then motion (pins, SplitText after fonts load) | done except the polish list below |
-| 4 | Preloader (`lib/loadClock.ts`), droplet cursor and goo layer, sound, grain overlay, SVG fallback | **next** |
-| 5 | Phone and reduced motion, full verification, OG image, icons, README, pull request, final report | |
+| 4 | Preloader (`lib/loadClock.ts`), droplet cursor and goo layer, sound, grain overlay, SVG fallback | done |
+| 5 | Phone and reduced motion, full verification, OG image, icons, README, pull request, final report | **next** |
 
 ## What exists
 
@@ -78,8 +78,33 @@ grani `claude/ecstatic-rubin-69cwed`."
 - `lib/quality.ts` (4 tiers: DPR, raymarch steps, particle texture size,
   self-reflection), `lib/gsap.ts` (plugins, `settle` / `tension` eases,
   durations, motion queries), `lib/palette.ts`, `lib/content.ts` (draft lines).
+- `lib/loadClock.ts`: load phases (code, context, shaders, frame, fonts),
+  `progress`, eased `mass`, `settle` (0 = drop centred as the preloader, 1 =
+  the chapter's framing). `components/Preloader.tsx` eases the mass, shows
+  the readout, releases (sets `html[data-loaded]`: `complete` or
+  `without <phases>`) and gives up after 9 s of wall-clock time. Content with
+  `data-await-load` is hidden until then, only under `(scripting: enabled)`.
+  The rest pose scales with the mass; the Director multiplies the lens shift
+  by `settle`. Reveals are split after fonts and release, then
+  `ScrollTrigger.refresh()`.
+- `components/DropletCursor.tsx`: trailing drop (fine pointers; the native
+  cursor stays), the `#goo` filter, and a 160px band at the top where the
+  drop and copies of every `[data-goo]` element (nav pill, sound toggle)
+  share the filter. The neck between pill and toggle is that filter.
+- `lib/audio.ts` + `components/SoundToggle.tsx`: drone on `store.fieldLevel`,
+  pad per chapter, noise wash on scroll speed, two UI ticks. The context is
+  created on the first click, suspended when off or hidden. The toggle sits
+  right of the pill; on phones it is fixed bottom right.
+- `components/GrainOverlay.tsx` (static SVG noise), `SceneFallback.tsx` (SVG
+  drop, hidden by the `scene-live:` variant unless `html[data-scene=fallback]`;
+  `scene/Scene.tsx` sets that without WebGL 2 or on `webglcontextlost`).
+- `components/SmoothScroll.tsx` also restores the scroll position itself on
+  reload (session storage, after the pins exist) and tells ScrollSmoother not
+  to re-centre headings focused by a jump (`onFocusIn`).
 - `scripts/shots.mjs`: screenshots, one chapter and one width per run; prints
-  fps (relative: CPU rendering) and the canvas size.
+  fps (relative: CPU rendering) and the canvas size. `scripts/flow.mjs`
+  (`npm run flow [-- --shots]`): 21 pass/fail checks at 800x600 — preloader,
+  keyboard path, field input, sound toggle, refresh mid-page, no WebGL.
 
 ## How to verify
 
@@ -114,6 +139,18 @@ part, hold, settle.
 - Keyboard: Tab reaches the nav first; Enter on a chapter scrolls there,
   moves focus to its heading and sets the active item; Tab continues into
   the page. Heading order is h1, h2, h3 with no skips. Both motion modes.
+- Phase 4: `npm run flow` passes 21 of 21 (preloader hides content and
+  releases as `complete`; Tab, Enter, exact landing, focus, active item;
+  the range input moves `--field`; no `AudioContext` before the click, one
+  running after, suspended when off; reload at the bottom reopens at the
+  same pixel in Settle; without WebGL the drawing shows and content is
+  released). Looked at: the preloader frames and the hero at 1024, the nav
+  with the drop merging at 800 (2x), the hero at 375 `--touch`, the fallback.
+- Not verified in phase 4: how any of the sound actually sounds (no audio
+  output here), a real `webglcontextlost` (only the no-WebGL path ran), the
+  cursor's stretch in motion, real load times (here the release comes about
+  9 s after first paint because shaders compile on the CPU), the chapters
+  other than Still since the grain and the cursor layer were added.
 - Not verified: real GPU frame rate, real phones, Safari, the half-float
   path, 768 / 1440 / 1920 widths, the page with JavaScript off (the HTML is
   server-rendered; not opened in a browser without scripts), dragging the
@@ -141,7 +178,12 @@ part, hold, settle.
 - A pinned chapter is pinned for `pin / (pin + 1)` of its story unit and
   scrolls out in the rest; the next state forms during that exit.
 
-## Left over from phase 3 (do when the frame is next touched, or in phase 5)
+## Left over (do when the frame is next touched, or in phase 5)
+
+- Press and hold does nothing yet (`store.pointer.down` is only used by the
+  cursor); optional in the brief. Scroll speed does stir the surface.
+- Chapter change has no sound of its own, only the pad's pitch.
+- The fallback drawing is one static drop for every chapter.
 
 - Reach at 1024: sparse grains of the field lines still cross the left edge
   of the text column. Hold's slab is still a flat grey face with a thick
@@ -151,36 +193,19 @@ part, hold, settle.
 - Phone Part was reframed (`tallX 0.37`, rows `pr-8`) after the last
   screenshot; look at it again. Part rows do not answer hover or focus yet
   (signature moment 4): add `store.partFocus` and swell that droplet.
-- Reveals split after fonts load, so first-screen text shows, then rises;
-  the preloader has to cover that. Settle's heading is four lines at 1024.
+- Settle's heading is four lines at 1024.
 
-## Next step (phase 4)
+## Next step (phase 5)
 
-Read `PROMPT.md` lines 496–518 and 586–602 once (42 lines); nothing else
-from the brief is needed. Then, one commit each:
+Read `PROMPT.md` lines 670–739 once. Then:
 
-1. Preloader: `lib/loadClock.ts` collects real progress (fonts, scene chunk,
-   context, shader compile, first frame); the drop's mass follows it and
-   becomes the hero subject without a cut; first-screen reveals start when
-   it ends; it releases itself after 8–10 s no matter what. Check a refresh
-   mid-page: the scene must open in the state of the real scroll position.
-2. Goo layer and droplet cursor: one small fixed SVG-filtered layer for the
-   nav pill, buttons and the cursor (fine pointers only, never hides the
-   native cursor for keyboard users).
-3. Sound (`lib/audio.ts`): Web Audio synthesis, `AudioContext` created only
-   on the click of a real toggle button, gains ramped, suspended when the tab
-   is hidden. A low tone follows `store.fieldLevel`, the layer follows the
-   chapter and `store.scroll.velocity`, short ticks for UI. The toggle needs
-   room in the nav (the pill is 320px wide at 375).
-4. Scene input that is stored but not used yet: `store.pointer.down` (press
-   and hold may strengthen the field) and `store.scroll.velocity` (scroll
-   speed may agitate the surface). Both are optional in the brief; add them
-   only if they read well in a screenshot.
-5. Grain as a DOM overlay; a static SVG of the subject built from tokens
-   when WebGL 2 is missing or the context is lost (nothing listens for
-   `webglcontextlost` yet; `html[data-scene]` is `ready` only while the
-   scene runs).
-6. `scripts/flow.mjs` (Playwright): walks the preloader, the keyboard path
-   (Tab to the nav, Enter on a chapter, focus on its heading, active item)
-   and the interactions (field input, sound toggle), prints pass or fail.
-   The keyboard check of phase 3 was a throwaway script; this replaces it.
+1. Screenshot every chapter at 375 `--touch` and at 1440, and each at 1024
+   `--reduced`; fix what the "Left over" list and the screenshots show
+   (start with reduced motion: states run ahead of the text).
+2. `app/opengraph-image.tsx` and `app/icon.tsx` generated in code from the
+   tokens; check the metadata output in the built HTML.
+3. Open the built page with JavaScript disabled (Playwright
+   `javaScriptEnabled: false`): content, nav links and the drawing must show.
+4. README (what it is, stack, how to run and verify, what is unverified).
+5. `npm run lint && npm run typecheck && npx next build`, `npm run flow`,
+   then the pull request to `main` and the final report to the owner.
