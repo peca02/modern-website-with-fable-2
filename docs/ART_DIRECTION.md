@@ -54,7 +54,27 @@ vocabulary, no hype, no invented product facts.
 - Bring a field close and the surface gathers itself, leans, and then stands up in a crown.
 - Take the field away and it lets go of every shape it was given.
 
+Facts the copy may state: ferrofluid is a suspension of magnetic nanoparticles
+(around 10 nm) in a carrier liquid; it was developed at NASA in 1963 by Steve
+Papell; the spikes are the normal-field (Rosensweig) instability, appearing
+above a critical field strength in a regular, roughly hexagonal pattern. Add
+no other physical facts, and never present Tarn's invented products as real.
+
+## Quality bar
+
+- A jury should stop scrolling at every frame. If a screenshot would not make
+  them, fix the frame before moving on.
+- The liquid answers the pointer within the first seconds.
+- Not allowed: an eyebrow label over every heading, numbered markers where
+  there is no sequence, one accented word per headline, identical rounded
+  cards, the same reveal on every section, arrows appended to links.
+- Nothing may recall the owner's previous site (dark page, orange accent,
+  glowing threads and streaks, hairline serif, weaving vocabulary; chapters
+  named Winding, Ignition, Inside, Yield).
+
 ## Chapters
+
+Total scroll length: about nine to ten viewport heights.
 
 | # | Name | Liquid state | Scroll | Framing wide / portrait |
 | --- | --- | --- | --- | --- |

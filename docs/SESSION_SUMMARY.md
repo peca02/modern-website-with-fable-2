@@ -2,65 +2,90 @@
 
 Branch: `claude/ecstatic-rubin-69cwed` (all work so far). Rewritten each session.
 
-## Phases
+Line for the owner to paste into the next session: "Pročitaj CLAUDE.md,
+docs/SESSION_SUMMARY.md i docs/ART_DIRECTION.md i nastavi. Prethodni rad je na
+grani `claude/ecstatic-rubin-69cwed`."
+
+## Phases (one session each, merge two if a phase turns out small)
 
 | Phase | Work | State |
 | --- | --- | --- |
 | 0 | Environment, versions, renderer, plan | done, approved |
 | 1 | Art direction, scaffold, tokens, store, GSAP scroll, canvas, quality tiers | done |
 | 2a | Raymarched SDF liquid, shading, analytic studio, hero state, pointer | **next** |
-| 2b | All liquid states, Director (keyframe tracks), GPGPU particles, shared CPU/GPU model | |
-| 3 | Chapters as semantic HTML with real copy, nav, then motion | |
-| 4 | Preloader, droplet cursor, sound, fallbacks | |
-| 5 | Phone + reduced motion, full verification, OG image, icons, README, PR, report | |
+| 2b | All liquid states, Director (keyframe tracks), GPGPU particles, shared CPU/GPU model for DOM labels | |
+| 3 | Chapters as semantic HTML with real copy, keyboard nav, then motion (pins, SplitText after fonts load) | |
+| 4 | Preloader (`lib/loadClock.ts`), droplet cursor and goo layer, sound, grain overlay, SVG fallback | |
+| 5 | Phone and reduced motion, full verification, OG image, icons, README, pull request, final report | |
 
-## Done in phase 1
+## What exists
 
 - `app/globals.css`: tokens (`@theme`, default palette off), `type-*` classes,
   `page-grid` (4 / 12 columns), `text-shadow-halo`, focus ring.
 - `app/layout.tsx`: fonts (Archivo with `wdth`, Instrument Sans), metadata.
   Canvas and pointer input sit outside the ScrollSmoother wrapper.
 - `app/page.tsx`: placeholder sections with `data-chapter` (replace in phase 3).
-- `lib/store.ts`: `scroll`, `story` (chapter index + progress), `pointer`,
-  `field`, `viewport`, `reducedMotion`, `quality`.
+- `lib/store.ts`: `scroll`, `story` (chapter index + progress), `pointer`
+  (NDC, velocity, down, active), `field`, `viewport`, `reducedMotion`, `quality`.
 - `components/SmoothScroll.tsx`: ScrollSmoother (full motion only), chapter
   ScrollTriggers, a ticker that writes scroll state to the store.
 - `components/PointerInput.tsx`, `components/SceneMount.tsx` (`next/dynamic`, `ssr: false`).
 - `scene/Scene.tsx`: Canvas (transparent, tier-based DPR), `PerformanceMonitor`
-  lowering the tier; sets `html[data-scene=ready]`. `scene/PlaceholderDrop.tsx`
-  is a stand-in to delete in phase 2a.
-- `lib/quality.ts` (4 tiers), `lib/gsap.ts` (plugins, `settle` / `tension`
-  eases, durations, motion queries), `lib/palette.ts`, `lib/content.ts`.
-- `scripts/shots.mjs`: `npm run shots -- <chapter> <width> [--reduced]`
-  against `next start` on port 3000; output in git-ignored `shots/`.
+  lowering the tier; sets `html[data-scene=ready]`.
+- `scene/PlaceholderDrop.tsx`: a flat black sphere, only a wiring test. Delete in 2a.
+- `lib/quality.ts` (4 tiers: DPR, raymarch steps, particle texture size,
+  self-reflection), `lib/gsap.ts` (plugins, `settle` / `tension` eases,
+  durations, motion queries), `lib/palette.ts`, `lib/content.ts` (draft lines).
+- `scripts/shots.mjs`: screenshots, one chapter and one width per run.
+
+## How to verify
+
+```
+npm run lint && npm run typecheck && npx next build | tail -8
+npx next start -p 3000 &
+npm run shots -- <chapter-id> <375|768|1024|1440|1920> [--reduced]
+```
+
+Output goes to git-ignored `shots/`; the script prints console errors, the
+motion mode and whether WebGL 2 exists. Chapter ids: still, reach, crown,
+part, hold, settle.
 
 ## Verified (headless Chromium, SwiftShader)
 
-- lint, typecheck, build pass; `/` is static.
-- WebGL 2 context created; no console errors; one H1.
+- lint, typecheck, build pass; `/` is static; no console errors; one H1.
+- WebGL 2 context created; float and half-float render targets available; a
+  shader writing `gl_FragDepth` compiles. WebGPU has no adapter here.
 - ScrollSmoother active in full motion, absent with reduced motion
-  (`html[data-motion]`); `story` drives the placeholder.
+  (`html[data-motion]`); `story` and the pointer reach the scene.
+- Tailwind's `in-data-pinned:` variant compiles in 4.3.5 (for phase 3 pins).
+- Only the hero at 1440 was looked at. Phone widths were not reviewed.
 
-## Notes for the next session
+## Notes
 
+- Owner feedback: the placeholder frame looked crude ("a circle drawn in
+  Paint"). The look of the liquid is the main risk and the main expectation.
+  In 2a judge the liquid by screenshot and iterate on gloss, reflections and
+  weight before building anything on top of it.
 - ScrollSmoother makes `#smooth-wrapper` fixed: `scrollIntoView` does not
   work. Jump with `window.scrollTo` or `ScrollSmoother.get()?.scrollTo()`.
-- Changes from the approved plan after the `frontend-design` pass: no
-  monospace (condensed Archivo for small labels), `ink` is pure `#000000`.
-- Hero letter-spacing and type scale are first guesses; tune in phase 3.
-- Not yet done: nav, real copy, pins, preloader hook (`lib/loadClock.ts`),
-  seam check by pixel sampling (do it once the liquid draws a shadow).
-
-## When to open PROMPT.md
-
-Not needed for phase 2a/2b beyond sections 10.1–10.3 (liquid, particles,
-light scene) if a detail is missing here. Phase 5 needs section 13
-(verification checklist) and section 15 (final deliverables).
+- Changes from the approved plan, already told to the owner: no monospace
+  (condensed Archivo for small labels), `ink` is pure `#000000`.
+- Open: the H1 is the wordmark "Tarn" for now; decide in phase 3 whether the
+  H1 should carry the story line. Type scale and letter-spacing are first guesses.
+- Not done yet: seam check by pixel sampling (once the liquid draws a shadow).
 
 ## Next step (phase 2a)
 
-Create `scene/liquid/`: a shared model module (blob centres, radii, lattice
-constants) that generates GLSL constants; a full-screen (or proxy) raymarch
-material writing `gl_FragDepth` and premultiplied alpha; analytic studio
-environment with the wordmark canvas texture; contact shadow; the resting drop
-leaning toward `store.pointer`. Check cost at tier 0 before adding states.
+Read `PROMPT.md` lines 467–479 and 534–578 first. Then create `scene/liquid/`:
+
+1. A shared model module (blob centres, radii, lattice constants, field
+   parameters) that generates GLSL constants and exposes the same maths to the CPU.
+2. A raymarch material on a full-screen or proxy quad: smooth-min body,
+   four-tap normals, `gl_FragDepth`, premultiplied alpha, steps from the tier.
+3. Analytic studio environment: soft boxes, horizon gradient, one `field`
+   strip, the wordmark as a canvas texture light. Fresnel, self-reflection on
+   tiers 2–3, contact shadow and a faint floor reflection as alpha.
+4. The resting drop leaning toward `store.pointer`, framed lower right on wide
+   screens and in the lower half on portrait.
+5. Screenshot still at 1440 and 375, iterate on the look, then check cost at
+   tier 0. Fall back to a displaced mesh only if the SDF fails there.
