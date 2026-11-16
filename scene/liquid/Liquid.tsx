@@ -2,13 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import { extend, useFrame, type ThreeElement } from "@react-three/fiber";
-import { Vector3, type CanvasTexture, type Mesh } from "three";
+import { Vector3, type Camera, type CanvasTexture, type Mesh } from "three";
 import { site } from "@/lib/content";
 import type { QualityTier } from "@/lib/quality";
 import { store } from "@/lib/store";
 import { LiquidMaterial } from "@/scene/liquid/LiquidMaterial";
 import { direction } from "@/scene/direction";
-import { createPose, liquid, liquidModel, mixPoses, poseLayout } from "@/scene/liquid/model";
+import { blobCentre, createPose, liquid, liquidModel, mixPoses, poseLayout, spikeTip, type Point3 } from "@/scene/liquid/model";
 import { Lean, writePose, type PoseInput, type PullTarget } from "@/scene/liquid/poses";
 import { createWordmarkTexture } from "@/scene/liquid/wordmark";
 
@@ -25,9 +25,18 @@ const poseFrom = createPose();
 const poseTo = createPose();
 const poseInput: PoseInput = { time: 0, still: false, reach: 0, field: 0, split: 0 };
 const pointerRay = new Vector3();
+const anchor = new Vector3();
+const point: Point3 = { x: 0, y: 0, z: 0 };
 const pull: PullTarget = { x: 0, y: 0 };
 const swell = { rest: 0.0035, stirred: 0.011, settle: 0.9 };
 let agitation = 0;
+
+function writeAnchor(out: Float32Array, index: number, camera: Camera, width: number, height: number, present: boolean) {
+  anchor.set(point.x, point.y, point.z).project(camera);
+  out[index * 3] = (anchor.x * 0.5 + 0.5) * width;
+  out[index * 3 + 1] = (0.5 - anchor.y * 0.5) * height;
+  out[index * 3 + 2] = present && anchor.z < 1 ? 1 : 0;
+}
 
 export function Liquid({ tier }: { tier: QualityTier }) {
   const material = useRef<LiquidMaterial>(null);
@@ -84,6 +93,15 @@ export function Liquid({ tier }: { tier: QualityTier }) {
     agitation = Math.max(speed, agitation * Math.exp(-step * swell.settle));
     liquid.swell = store.reducedMotion ? 0 : swell.rest + (swell.stirred - swell.rest) * agitation;
     liquid.swellTime = clock.elapsedTime;
+
+    liquidModel.labelledSpikes.forEach(([column, row], index) => {
+      const standing = spikeTip(liquid.pose, column, row, point);
+      writeAnchor(store.anchors.spikes, index, camera, size.width, size.height, standing);
+    });
+    for (let index = 0; index < 4; index += 1) {
+      blobCentre(liquid.pose, index, point);
+      writeAnchor(store.anchors.droplets, index, camera, size.width, size.height, direction.split > 0.5);
+    }
 
     volume.current?.scale.set(liquid.pose[poseLayout.extentX] * 2, liquidModel.height, liquid.pose[poseLayout.extentZ] * 2);
     target.syncState(liquid);

@@ -118,4 +118,6 @@ Total scroll length: about nine to ten viewport heights.
   strip right, wordmark panel behind the camera. No Drei `Environment`.
 - Transparent canvas; contact shadow is alpha. No post-processing passes.
 - Particles: GPGPU dark round grains, normal blending, depth-tested against
-  the liquid's `gl_FragDepth`.
+  the liquid's `gl_FragDepth`. None in the hero; they arrive with Reach as
+  dipole field lines, then lattice heaps (Crown), droplet rings (Part), a
+  halo, a frame and a shell around the three Hold forms, and thin dust at the end.

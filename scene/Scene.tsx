@@ -6,6 +6,7 @@ import { PerformanceMonitor } from "@react-three/drei";
 import { lowerTier, pickInitialTier, qualitySettings, type QualityTier } from "@/lib/quality";
 import { store } from "@/lib/store";
 import { Director } from "@/scene/Director";
+import { Grains } from "@/scene/grains/Grains";
 import { Liquid } from "@/scene/liquid/Liquid";
 
 function initialTier(): QualityTier {
@@ -35,6 +36,7 @@ export function Scene() {
     >
       <PerformanceMonitor onDecline={decline} />
       <Director />
+      <Grains key={tier} tier={tier} />
       <Liquid tier={tier} />
     </Canvas>
   );

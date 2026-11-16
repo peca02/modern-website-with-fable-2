@@ -13,8 +13,8 @@ grani `claude/ecstatic-rubin-69cwed`."
 | 0 | Environment, versions, renderer, plan | done, approved |
 | 1 | Art direction, scaffold, tokens, store, GSAP scroll, canvas, quality tiers | done |
 | 2a | Raymarched SDF liquid, shading, analytic studio, hero state, pointer | done |
-| 2b | All liquid states, Director (keyframe tracks), GPGPU particles, CPU model wired to DOM labels | **next** |
-| 3 | Chapters as semantic HTML with real copy, keyboard nav, then motion (pins, SplitText after fonts load) | |
+| 2b | All liquid states, Director (keyframe tracks), GPGPU particles, CPU model wired to DOM labels | done |
+| 3 | Chapters as semantic HTML with real copy, keyboard nav, then motion (pins, SplitText after fonts load) | **next** |
 | 4 | Preloader (`lib/loadClock.ts`), droplet cursor and goo layer, sound, grain overlay, SVG fallback | |
 | 5 | Phone and reduced motion, full verification, OG image, icons, README, pull request, final report | |
 
@@ -32,21 +32,31 @@ grani `claude/ecstatic-rubin-69cwed`."
 - `components/PointerInput.tsx`, `components/SceneMount.tsx` (`next/dynamic`, `ssr: false`).
 - `scene/Scene.tsx`: Canvas (transparent, tier-based DPR), `PerformanceMonitor`
   lowering the tier; sets `html[data-scene=ready]`. Mounts `Director` and `Liquid`.
-- `scene/Director.tsx`: owns the camera. Only the hero frame so far: distance
-  from the aspect ratio, subject placed with a lens shift (`setViewOffset`).
-- `scene/liquid/model.ts` (no three import): constants, the live `liquid`
-  state (blobs as a flat `Float32Array`, squash, blend, swell),
-  `distanceToLiquid()` for the CPU, generated GLSL constants.
-- `scene/liquid/shaders.ts`: raymarch in a proxy box (back faces), smooth-min
-  blobs, four-tap normals, silhouette coverage from the nearest miss,
-  `gl_FragDepth`, premultiplied alpha. Analytic studio: dark room with a lit
-  front wall, key soft box, side strip, `field` strip, wordmark panel. Contact
-  shadow and floor reflection are alpha on the floor plane. Defines per tier:
-  `STEPS`, `SHADOW_STEPS`, `SELF_REFLECTION`, `FLOOR_REFLECTION`.
-- `scene/liquid/LiquidMaterial.ts` (class, uniforms written through methods),
-  `wordmark.ts` (canvas texture from the Archivo variable), `restingDrop.ts`
-  (chapter 1 state: main blob plus a lobe that travels toward the pointer),
-  `Liquid.tsx` (mesh, pointer ray, swell stirred by pointer speed).
+- `scene/direction.ts` (no three import): the shot list. Keys in story units
+  for camera shots, liquid poses and grain shapes, plus number tracks
+  (`reach`, `field`, `split`, grain weight). `direct()` samples them into
+  `direction`. All timing lives here.
+- `scene/Director.tsx`: calls `direct(store.story, store.field)` and sets the
+  camera (elevation, span, lens shift for wide and portrait).
+- `scene/liquid/model.ts` (no three import): constants, the pose layout (a
+  flat `Float32Array`: 8 blobs, squash, blend, ceiling, spike field, slab,
+  orb spikes, proxy extent, shadow falloff), `spikeTip()` and `blobCentre()`
+  for the CPU, generated GLSL constants.
+- `scene/liquid/poses.ts`: one writer per pose (rest with pointer lean, reach,
+  crown, part, bridge, slab, orb, pool). `Liquid.tsx` writes the two poses
+  around the current key and lerps them; hidden blobs have radius -1.
+- `scene/liquid/shaders.ts`: raymarch in a proxy box (back faces, extent from
+  the pose), smooth-min blobs, hex lattice of cones (`sdSpikes`), radial
+  spikes on blob 0 (`sdOrbSpikes`), rounded slab, flat ceiling cut, four-tap
+  normals, silhouette coverage, `gl_FragDepth`, premultiplied alpha. Analytic
+  studio, contact shadow and floor reflection as in 2a.
+- `scene/liquid/LiquidMaterial.ts`, `wordmark.ts`, `Liquid.tsx` (mesh,
+  pointer ray, swell, and `store.anchors`: three labelled spike tips and four
+  droplet centres projected to CSS pixels, third value 1 when present).
+- `scene/grains/`: GPGPU grains. `GrainSimulation.ts` (ping-pong targets,
+  float with half-float fallback, points drawn as opaque discs before the
+  liquid), `shaders.ts` (target formula per shape: dust, dipole field lines,
+  lattice heaps, droplet rings, halo, frame, shell; curl turbulence).
 - `lib/quality.ts` (4 tiers: DPR, raymarch steps, particle texture size,
   self-reflection), `lib/gsap.ts` (plugins, `settle` / `tension` eases,
   durations, motion queries), `lib/palette.ts`, `lib/content.ts` (draft lines).
@@ -58,10 +68,10 @@ grani `claude/ecstatic-rubin-69cwed`."
 ```
 npm run lint && npm run typecheck && npx next build | tail -8
 npx next start -p 3000 &
-npm run shots -- <chapter-id> <375|768|1024|1440|1920> [--reduced] [--pointer=0.5,0.45] [--touch]
+npm run shots -- <chapter-id> <375|768|1024|1440|1920> [--reduced] [--pointer=0.5,0.45] [--touch] [--offset=0.5]
 ```
 
-`next dev -p 3000` is faster while iterating on a shader. `--pointer` parks
+`next dev -p 3000` is faster while iterating on a shader. `--offset` scrolls that many viewport heights past the chapter top. `--pointer` parks
 the mouse at viewport fractions; `--touch` emulates a 3x phone (tier 0).
 Output goes to git-ignored `shots/`; the script prints console errors, the
 motion mode and whether WebGL 2 exists. Chapter ids: still, reach, crown,
@@ -75,14 +85,16 @@ part, hold, settle.
 - ScrollSmoother active in full motion, absent with reduced motion
   (`html[data-motion]`); `story` and the pointer reach the scene.
 - Tailwind's `in-data-pinned:` variant compiles in 4.3.5 (for phase 3 pins).
-- Hero looked at by screenshot at 1440 (idle, pointer lean) and 375 (desktop
-  tier and `--touch` tier 0, before its DPR cap was raised). Reduced motion
-  at 1440 ran without console errors; its image was not looked at. The wordmark reads in the
-  reflection; the page color is untouched outside the shadow (pixel sampled).
-- Cost, relative only (SwiftShader, CPU): 16 fps at 1440x900, 40 fps at tier
-  0 on 375x812. The SDF passed on look and cost; no displaced mesh needed.
-- Not verified: real GPU frame rate, real phones, Safari. Self-reflection
-  compiles but has never had concave geometry to show; judge it in Crown.
+- Hero at 1024 is unchanged after 2b (screenshot). Looked at, 1024 wide:
+  reach +0.3, crown +0.5 (profile) and +0.8 (top), part +0.45, hold +0.1 /
+  +0.4 / +0.65 (bridge, slab, orb), settle; crown +0.5 at 375 `--touch`.
+  Grains are hidden by the liquid where they pass behind it.
+- Cost, relative only: this session's container had 4 cores and ran the 2a
+  commit at 2 fps (it measured 16 before), 2b at 1–2 fps at 1024x768. No
+  usable frame-rate number came out of it.
+- Not verified: real GPU frame rate, real phones, Safari, the half-float
+  path, `store.anchors` against pixels (check when the first label uses
+  them), reduced motion images, widths other than 1024 and one phone frame.
 
 ## Notes
 
@@ -96,28 +108,22 @@ part, hold, settle.
   work. Jump with `window.scrollTo` or `ScrollSmoother.get()?.scrollTo()`.
 - Changes from the approved plan, already told to the owner: no monospace
   (condensed Archivo for small labels), `ink` is pure `#000000`.
+- The proxy volume follows the pose (`extentX/Z`); wide poses set their own.
 - Open: the H1 is the wordmark "Tarn" for now; decide in phase 3 whether the
   H1 should carry the story line. Type scale and letter-spacing are first guesses.
 
-## Next step (phase 2b)
+## Next step (phase 3)
 
-`PROMPT.md` is not needed to start: this file and `docs/ART_DIRECTION.md`
-(chapters table, signature moments, scene decisions) carry the brief for 2b.
-Open lines 467–479 and 534–578 only if a rule is unclear. 2b is the largest
-phase: commit after every state, and hand over after step 2 if the session
-has grown. In order, one screenshot-verified step at a time:
+Read `PROMPT.md` lines 322–346, 481–494, 520–526, 580–584, 705–718 once.
+Replace `app/page.tsx` with real chapters (server components, copy in
+`lib/content.ts`), keyboard navigation, then motion. Pinned chapters (Crown,
+Part, Hold) get their length from the pin, so `store.story` keeps meaning
+"chapter index + progress"; retime the keys in `scene/direction.ts` against
+the real layout (with the placeholder sections each chapter is one viewport
+and the Hold forms pass too fast). Wire the field `<input type="range">` to
+`store.field`, spike labels and list rows to `store.anchors`.
 
-1. Director: keyframe tracks over `store.story` for camera, lens shift and a
-   state weight per chapter; `restingDrop` becomes one state among several
-   that write into `liquid`.
-2. Liquid states: Reach (cusp toward a magnet point), Crown (hex lattice of
-   cones in the SDF, height from `store.field` and scroll; lattice constants
-   in `model.ts` with the same tip positions on the CPU), Part (4 droplets),
-   Hold (bridge, slab, spiked sphere), Settle (wide pool, strong squash). The
-   model has only spheres; add primitives as states need them.
-3. GPGPU particles: dark round grains, float target with half-float
-   fallback, depth-tested against the liquid's `gl_FragDepth`.
-4. A projection helper for DOM labels (spike tips, droplet centres).
-
-The proxy box bounds are fixed (`liquidModel.bounds`); wide states (pool,
-droplets) may need them larger or animated.
+Known rough spots to judge again once the layout is real: the slab face is a
+flat grey mirror with a thick `field` band on top; Reach field lines must
+stay grainy and not read as drawn hairlines; portrait framing of Crown sits
+mid-screen, not top; low tiers show blocky reflections between spikes.

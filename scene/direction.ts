@@ -121,7 +121,7 @@ const tracks = {
   /** one puddle (0) to four droplets (1) and back */
   split: [[3.1, 0], [3.35, 1], [3.6, 1], [3.85, 0]],
   /** share of the grains that are present; the hero frame has none */
-  grains: [[0.25, 0], [0.9, 1], [4.72, 1], [4.95, 0.3]],
+  grains: [[0.25, 0], [0.9, 0.7], [4.72, 0.7], [4.95, 0.1]],
 } satisfies Record<string, readonly NumberKey[]>;
 
 const shotSegment: Segment = { from: 0, to: 0, mix: 0 };

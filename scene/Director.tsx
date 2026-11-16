@@ -22,6 +22,8 @@ export function Director() {
     const elevation = MathUtils.degToRad(shot.elevation);
     camera.position.set(0, shot.targetY + Math.sin(elevation) * distance, Math.cos(elevation) * distance);
     camera.lookAt(0, shot.targetY, 0);
+    // Projections made later this frame (pointer ray, DOM anchors) need the new pose now.
+    camera.updateMatrixWorld();
 
     // Lens shift instead of turning the camera: the subject moves off-centre
     // without the stretch an off-axis sphere gets under perspective.

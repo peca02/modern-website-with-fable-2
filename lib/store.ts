@@ -24,6 +24,14 @@ export const store = {
   /** 0–1, written by the field instrument */
   field: 0,
   viewport: { width: 1, height: 1 },
+  /**
+   * Scene points projected to the viewport for DOM labels, written every
+   * frame: x and y in CSS pixels, then 1 when the point exists, else 0.
+   */
+  anchors: {
+    spikes: new Float32Array(3 * 3),
+    droplets: new Float32Array(4 * 3),
+  },
   reducedMotion: false,
   quality: 2 as QualityTier,
 };

@@ -47,6 +47,12 @@ export const liquidModel = {
   /** vertical pitch of the four droplets in Part, along z */
   dropletPitch: 1.3,
   ceilingOff: 10,
+  /** lattice cells (column, row) whose spike tips carry DOM labels */
+  labelledSpikes: [
+    [0, 0],
+    [-2, 0],
+    [1, 2],
+  ],
 } as const;
 
 /** Layout of a pose buffer. Poses are lerped component by component. */
