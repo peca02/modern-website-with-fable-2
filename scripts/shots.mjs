@@ -28,7 +28,11 @@ const sceneReady = await page
   .then(() => true)
   .catch(() => false);
 await page.evaluate(() => document.fonts.ready);
-await page.evaluate((id) => document.getElementById(id)?.scrollIntoView({ behavior: "instant" }), chapter);
+// ScrollSmoother fixes the wrapper, so scrollIntoView does nothing; scroll the window instead.
+await page.evaluate((id) => {
+  const target = document.getElementById(id);
+  if (target) window.scrollTo(0, target.getBoundingClientRect().top + window.scrollY);
+}, chapter);
 await page.waitForTimeout(2500);
 
 const state = await page.evaluate(() => ({

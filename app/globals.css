@@ -20,7 +20,7 @@
   --text-body: clamp(1rem, 1.1vw, 1.125rem);
   --text-micro: clamp(0.8125rem, 0.9vw, 0.9375rem);
 
-  --tracking-hero: -0.035em;
+  --tracking-hero: -0.02em;
   --tracking-display: -0.025em;
   --tracking-title: -0.01em;
   --tracking-micro: 0.01em;
