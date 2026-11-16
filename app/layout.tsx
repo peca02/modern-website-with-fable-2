@@ -10,6 +10,7 @@ import { GrainOverlay } from "@/components/GrainOverlay";
 import { PointerInput } from "@/components/PointerInput";
 import { Preloader } from "@/components/Preloader";
 import { site } from "@/lib/content";
+import { palette } from "@/lib/palette";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -31,10 +32,12 @@ export const metadata: Metadata = {
   metadataBase: new URL(deploymentHost ? `https://${deploymentHost}` : "http://localhost:3000"),
   title: site.title,
   description: site.description,
+  openGraph: { type: "website", siteName: site.name, title: site.title, description: site.description },
+  twitter: { card: "summary_large_image", title: site.title, description: site.description },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#edeff1",
+  themeColor: palette.page,
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

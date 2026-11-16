@@ -34,7 +34,7 @@ Composite classes: `type-hero`, `type-display`, `type-title`, `type-body`,
 
 Mass and gloss. One body of mirror-black liquid reflecting a soft studio and
 the wordmark. In the DOM: heavy wide type, solid black shapes, meniscus joins
-(SVG goo filter on a small fixed layer: nav, buttons, droplet cursor). No
+(SVG goo filter on a small fixed layer: nav, sound toggle, droplet cursor). No
 threads, streaks, hairlines, cards or gradients.
 
 ## Motion language (`lib/gsap.ts`)
@@ -95,8 +95,9 @@ Total scroll length: about nine to ten viewport heights.
    real `<input type="range">` drives the field (and pitch when sound is on).
    Headline letters gain mass with the field.
 4. Part: droplets line up with the rows of a DOM list (what Tarn makes:
-   fluids, fields, vessels, commissions) and answer hover and focus.
-5. A droplet cursor that stretches with speed and merges with buttons.
+   fluids, fields, vessels, commissions); the rows travel to droplet heights.
+5. A droplet cursor that stretches with speed and merges with the fixed
+   controls (nav pill, sound toggle) through the goo layer at the top.
 
 ## Framing rules
 

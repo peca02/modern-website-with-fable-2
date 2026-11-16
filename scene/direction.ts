@@ -56,7 +56,7 @@ const shots = {
   crownTop: { targetY: 0.3, elevation: 60, span: 3.3, wideX: 0.24, wideY: 0.02, tallX: 0, tallY: -0.16, tallFill: 0.46 },
   part: { targetY: 0.2, elevation: 66, span: 2.7, wideX: 0.28, wideY: 0, tallX: 0.37, tallY: 0.14, tallFill: 0.33 },
   hold: { targetY: 1.1, elevation: 7, span: 3.1, wideX: 0, wideY: 0.07, tallX: 0, tallY: 0.06, tallFill: 0.46 },
-  settle: { targetY: 0.4, elevation: 15, span: 3.7, wideX: 0, wideY: 0.3, tallX: 0, tallY: 0.3, tallFill: 0.46 },
+  settle: { targetY: 0.4, elevation: 15, span: 3.7, wideX: 0, wideY: 0.3, tallX: 0, tallY: 0.3, tallFill: 0.3 },
 } satisfies Record<string, Shot>;
 
 const shotKeys: readonly (Keyed & { shot: Shot })[] = [

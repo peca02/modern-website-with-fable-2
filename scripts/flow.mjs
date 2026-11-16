@@ -1,6 +1,7 @@
 // Usage: npm run flow -- [--shots] [--url=http://localhost:3000]
 // Walks the preloader, the keyboard path, the interactions, a refresh
-// mid-page and the no-WebGL fallback, and prints pass or fail for each check.
+// mid-page, the fallbacks (no WebGL, lost context, stalled load), reduced
+// motion and the page without JavaScript; prints pass or fail for each check.
 // --shots also writes shots/flow-*.png (the nav with the droplet, the fallback).
 import { mkdir } from "node:fs/promises";
 import { chromium } from "playwright";
@@ -147,6 +148,81 @@ if (shots) {
   await barePage.screenshot({ path: "shots/flow-fallback.png" });
 }
 await bare.close();
+
+// 7. Lost context
+const lost = await browser.newContext({ viewport });
+const lostPage = await lost.newPage();
+await lostPage.goto(url, { waitUntil: "commit" });
+await lostPage.waitForSelector("html[data-loaded]", slow);
+check("lost context: scene ran first", (await lostPage.getAttribute("html", "data-scene")) === "ready");
+await lostPage.evaluate(() => document.querySelector("canvas")?.getContext("webgl2")?.getExtension("WEBGL_lose_context")?.loseContext());
+await lostPage.waitForSelector("html[data-scene=fallback]", { timeout: 30000, state: "attached" }).catch(() => {});
+check("lost context: marked on the document", (await lostPage.getAttribute("html", "data-scene")) === "fallback");
+check("lost context: drawing shown", await lostPage.isVisible("[data-scene-fallback]"));
+check("lost context: content shown", (await contentVisibility(lostPage)) === "visible");
+await lost.close();
+
+// 8. Stalled load: the chunk that holds the shaders never arrives
+const stalled = await browser.newContext({ viewport });
+const stalledPage = await stalled.newPage();
+await stalledPage.route("**/_next/static/chunks/**", async (route) => {
+  const response = await route.fetch();
+  if ((await response.text()).includes("gl_FragDepth")) return;
+  await route.fulfill({ response });
+});
+await stalledPage.goto(url, { waitUntil: "commit" });
+await stalledPage.waitForSelector("html[data-loaded]", slow);
+const stalledAs = await stalledPage.getAttribute("html", "data-loaded");
+check("stalled load: the timeout releases the preloader", stalledAs.startsWith("without"), stalledAs);
+check("stalled load: content shown", (await contentVisibility(stalledPage)) === "visible");
+await stalled.close();
+
+// 9. Reduced motion
+const calm = await browser.newContext({ viewport, reducedMotion: "reduce" });
+const calmPage = await calm.newPage();
+await calmPage.goto(url, { waitUntil: "commit" });
+await calmPage.waitForSelector("html[data-loaded]", slow);
+await calmPage.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+await calmPage.waitForTimeout(1500);
+const calmState = await calmPage.evaluate(() => ({
+  motion: document.documentElement.dataset.motion,
+  spacers: document.querySelectorAll(".pin-spacer").length,
+  pinned: document.querySelectorAll("[data-pinned]").length,
+  wrapper: getComputedStyle(document.querySelector("#smooth-wrapper")).position,
+  transform: getComputedStyle(document.querySelector("#smooth-content")).transform,
+  hidden: [...document.querySelectorAll("main h1, main h2, main h3, main p, main li")].filter((element) => {
+    const style = getComputedStyle(element);
+    return style.visibility === "hidden" || style.opacity === "0" || element.getClientRects().length === 0;
+  }).length,
+}));
+check("reduced motion: reported", calmState.motion === "reduced", String(calmState.motion));
+check("reduced motion: no pins", calmState.spacers === 0 && calmState.pinned === 0, `${calmState.spacers} spacers`);
+check("reduced motion: no smooth scroll", calmState.wrapper !== "fixed" && calmState.transform === "none", `${calmState.wrapper}, ${calmState.transform}`);
+check("reduced motion: content complete", calmState.hidden === 0, `${calmState.hidden} hidden elements`);
+await calm.close();
+
+// 10. JavaScript disabled
+const plain = await browser.newContext({ viewport, javaScriptEnabled: false });
+const plainPage = await plain.newPage();
+await plainPage.goto(url, { waitUntil: "load" });
+check("no script: content shown", await plainPage.isVisible("#smooth-wrapper"));
+const headings = await plainPage.locator("h1, h2, h3, h4, h5, h6").evaluateAll((elements) =>
+  elements.map((element) => ({ level: Number(element.tagName[1]), shown: element.getClientRects().length > 0 })),
+);
+check("no script: every heading is laid out", headings.length > 6 && headings.every((heading) => heading.shown), `${headings.length} headings`);
+const links = await plainPage.locator("nav a").evaluateAll((elements) =>
+  elements.map((element) => element.getAttribute("href")).filter((href) => href && document.querySelector(href.slice(href.indexOf("#")))),
+);
+check("no script: nav links point at chapters", links.length === 6, links.join(" "));
+check("no script: drawing shown", await plainPage.isVisible("[data-scene-fallback]"));
+check("no script: no preloader in the way", !(await plainPage.isVisible("[role=status]")));
+if (shots) await plainPage.screenshot({ path: "shots/flow-noscript.png" });
+
+// 11. Headings
+const levels = headings.map((heading) => heading.level);
+check("headings: one h1", levels.filter((level) => level === 1).length === 1 && levels[0] === 1);
+check("headings: no level skipped", levels.every((level, index) => index === 0 || level - levels[index - 1] <= 1), levels.join(""));
+await plain.close();
 
 await browser.close();
 console.log(failed ? `${failed} failed` : "all passed");
