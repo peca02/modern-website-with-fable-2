@@ -19,7 +19,8 @@ export function Director() {
     const wide = MathUtils.smoothstep(aspect, 0.75, 1.3);
 
     // Wide screens size the subject against the height, narrow ones against the width.
-    const visibleHeight = Math.max(shot.span / 0.46, shot.span / (0.62 * aspect));
+    const fill = MathUtils.lerp(shot.tallFill, 0.46, wide);
+    const visibleHeight = Math.max(shot.span / fill, shot.span / (0.62 * aspect));
     const distance = visibleHeight / (2 * Math.tan(MathUtils.degToRad(camera.fov) / 2));
     const elevation = MathUtils.degToRad(shot.elevation);
     camera.position.set(0, shot.targetY + Math.sin(elevation) * distance, Math.cos(elevation) * distance);
