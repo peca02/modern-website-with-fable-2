@@ -23,6 +23,7 @@ export class LiquidMaterial extends ShaderMaterial {
         uBlend: { value: 0.5 },
         uCeiling: { value: liquidModel.ceilingOff },
         uSpike: { value: 0 },
+        uShadow: { value: 3.6 },
         uOrbSpike: { value: 0 },
         uSlab: { value: new Vector4() },
         uSlabSize: { value: new Vector4() },
@@ -53,6 +54,7 @@ export class LiquidMaterial extends ShaderMaterial {
     this.uniforms.uBlend.value = pose[poseLayout.blend];
     this.uniforms.uCeiling.value = pose[poseLayout.ceiling];
     this.uniforms.uSpike.value = pose[poseLayout.spike];
+    this.uniforms.uShadow.value = pose[poseLayout.shadow];
     this.uniforms.uOrbSpike.value = pose[poseLayout.orbSpike];
     if (this.uniforms.uSlab.value instanceof Vector4) this.uniforms.uSlab.value.fromArray(pose, poseLayout.slab);
     if (this.uniforms.uSlabSize.value instanceof Vector4) {

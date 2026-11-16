@@ -27,6 +27,7 @@ uniform float uBlend;
 uniform float uCeiling;
 uniform float uSpike;
 uniform float uOrbSpike;
+uniform float uShadow;
 uniform vec4 uSlab;
 uniform vec4 uSlabSize;
 uniform float uSwell;
@@ -126,7 +127,7 @@ float sdLiquid(vec3 p) {
   // silhouette, but reflections magnify it, and that is what reads as liquid.
   float swell = sin(q.x * 4.2 + uSwellTime * 0.9) * sin(q.z * 3.6 - uSwellTime * 0.7) + 0.6 * sin(q.y * 5.0 + q.x * 2.0 + uSwellTime * 1.1);
   d = (d + swell * uSwell) * uSquash;
-  if (uSpike > 0.001) d = smin(d, sdSpikes(p), 0.14);
+  if (uSpike > 0.001) d = smin(d, sdSpikes(p), 0.2);
   if (uOrbSpike > 0.001) d = smin(d, sdOrbSpikes(p), 0.1);
   if (uSlab.w > 0.001) d = smin(d, sdSlab(p), 0.3);
   return max(d, p.y - uCeiling);
@@ -247,7 +248,7 @@ vec3 display(vec3 c) {
 
 float contactShadow(vec3 p) {
   float d = sdLiquid(p);
-  float occlusion = clamp(exp(-d * 3.6), 0.0, 1.0);
+  float occlusion = clamp(exp(-d * uShadow), 0.0, 1.0);
 
   float lit = 1.0;
   float t = 0.06;

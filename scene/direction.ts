@@ -52,7 +52,7 @@ const shots = {
   crownTop: { targetY: 0.3, elevation: 60, span: 3.3, wideX: 0.16, wideY: 0.02, tallX: 0, tallY: -0.16 },
   part: { targetY: 0.2, elevation: 66, span: 2.7, wideX: 0.2, wideY: 0, tallX: 0.2, tallY: 0 },
   hold: { targetY: 1.1, elevation: 7, span: 3.1, wideX: 0, wideY: 0.07, tallX: 0, tallY: 0.06 },
-  settle: { targetY: 0.5, elevation: 10, span: 6.4, wideX: 0, wideY: 0.3, tallX: 0, tallY: 0.3 },
+  settle: { targetY: 0.4, elevation: 15, span: 3.7, wideX: 0, wideY: 0.3, tallX: 0, tallY: 0.3 },
 } satisfies Record<string, Shot>;
 
 const shotKeys: readonly (Keyed & { shot: Shot })[] = [
@@ -61,8 +61,9 @@ const shotKeys: readonly (Keyed & { shot: Shot })[] = [
   { at: 1, shot: shots.reach },
   { at: 1.5, shot: shots.reach },
   { at: 2, shot: shots.crownProfile },
-  { at: 2.4, shot: shots.crownProfile },
-  { at: 2.8, shot: shots.crownTop },
+  { at: 2.35, shot: shots.crownProfile },
+  { at: 2.7, shot: shots.crownTop },
+  { at: 2.85, shot: shots.crownTop },
   { at: 3.1, shot: shots.part },
   { at: 3.75, shot: shots.part },
   { at: 4, shot: shots.hold },
@@ -79,7 +80,7 @@ const poseKeys: readonly (Keyed & { pose: PoseId })[] = [
   { at: 0.95, pose: "reach" },
   { at: 1.5, pose: "reach" },
   { at: 2, pose: "crown" },
-  { at: 2.8, pose: "crown" },
+  { at: 2.9, pose: "crown" },
   { at: 3.1, pose: "part" },
   { at: 3.8, pose: "part" },
   { at: 4, pose: "bridge" },
@@ -116,9 +117,9 @@ const tracks = {
   /** how far the cusp has travelled toward the magnet */
   reach: [[0.4, 0.2], [1, 0.88], [1.5, 1]],
   /** field over the lattice; the crown stands above the critical value */
-  field: [[2, 0], [2.6, 1], [2.8, 1], [3, 0]],
+  field: [[2, 0], [2.5, 1], [2.88, 1], [3.05, 0]],
   /** one puddle (0) to four droplets (1) and back */
-  split: [[3.05, 0], [3.35, 1], [3.6, 1], [3.85, 0]],
+  split: [[3.1, 0], [3.35, 1], [3.6, 1], [3.85, 0]],
   /** share of the grains that are present; the hero frame has none */
   grains: [[0.25, 0], [0.9, 1], [4.72, 1], [4.95, 0.3]],
 } satisfies Record<string, readonly NumberKey[]>;

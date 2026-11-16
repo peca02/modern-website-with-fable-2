@@ -32,14 +32,14 @@ export const liquidModel = {
   magnet: { x: 1.75, y: 2.5, z: 0 },
   /** hexagonal lattice of spikes, centred on the world origin */
   crown: {
-    spacing: 0.37,
+    spacing: 0.33,
     /** radius at which the local field has dropped to 1/e */
     envelope: 1.08,
     /** local field below which no spike stands */
     critical: 0.34,
-    height: 0.82,
+    height: 0.72,
     /** tangent of the cone half-angle */
-    slope: 0.235,
+    slope: 0.3,
     tipRound: 0.016,
   },
   /** yaw of the slab in Hold, so one edge faces the camera */
@@ -67,7 +67,9 @@ export const poseLayout = {
   /** half width and half depth of the proxy volume the raymarch runs in */
   extentX: maxBlobs * 4 + 13,
   extentZ: maxBlobs * 4 + 14,
-  size: maxBlobs * 4 + 15,
+  /** falloff of the contact shadow; low wide bodies need a tighter one */
+  shadow: maxBlobs * 4 + 15,
+  size: maxBlobs * 4 + 16,
 } as const;
 
 export type Pose = Float32Array;
@@ -86,6 +88,7 @@ export function resetPose(pose: Pose): Pose {
   pose[poseLayout.ceiling] = liquidModel.ceilingOff;
   pose[poseLayout.extentX] = liquidModel.extent;
   pose[poseLayout.extentZ] = liquidModel.extent;
+  pose[poseLayout.shadow] = 3.6;
   return pose;
 }
 

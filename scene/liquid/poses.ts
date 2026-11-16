@@ -68,7 +68,7 @@ function reachPose(pose: Pose, input: PoseInput) {
   const length = Math.hypot(dx, dy);
   const wobble = input.still ? 0 : Math.sin(input.time * 0.9) * 0.012;
   pose[poseLayout.squash] = squash;
-  pose[poseLayout.blend] = 0.5 - 0.2 * input.reach;
+  pose[poseLayout.blend] = 0.5 - 0.14 * input.reach;
   setBlob(pose, 0, 0.1 * input.reach, rest.lift - 0.04 * input.reach, 0, rest.radius * (1 - 0.1 * input.reach));
   chain.forEach(([distance, radius], index) => {
     const travel = distance * (input.reach + wobble);
@@ -77,20 +77,22 @@ function reachPose(pose: Pose, input: PoseInput) {
 }
 
 function crownPose(pose: Pose, input: PoseInput) {
-  pose[poseLayout.squash] = 0.36;
+  pose[poseLayout.squash] = 0.46;
   pose[poseLayout.spike] = input.field;
+  pose[poseLayout.shadow] = 6.5;
   // The mound sinks as the spikes take its volume.
-  setBlob(pose, 0, 0, 0.38 - 0.3 * input.field, 0, 1.62);
+  setBlob(pose, 0, 0, 0.3 - 0.28 * input.field, 0, 1.42);
 }
 
 function partPose(pose: Pose, input: PoseInput) {
   const split = input.split;
   pose[poseLayout.squash] = 0.62;
+  pose[poseLayout.shadow] = 7;
   pose[poseLayout.extentX] = 2.6;
   pose[poseLayout.extentZ] = 4.4;
   pose[poseLayout.blend] = 0.5 - 0.22 * split;
   for (let index = 0; index < 4; index += 1) {
-    const radius = 0.86 - 0.32 * split;
+    const radius = 0.86 - 0.36 * split;
     setBlob(pose, index, 0, 0.42 - 0.1 * split, (index - 1.5) * liquidModel.dropletPitch * split, radius);
   }
 }
@@ -129,8 +131,9 @@ const pool = [
 
 function poolPose(pose: Pose) {
   pose[poseLayout.squash] = 0.17;
+  pose[poseLayout.shadow] = 7;
   pose[poseLayout.extentX] = 5.6;
-  pose[poseLayout.extentZ] = 3.2;
+  pose[poseLayout.extentZ] = 4.4;
   pose[poseLayout.blend] = 0.9;
   pool.forEach(([x, z, radius], index) => setBlob(pose, index, x, 0.25, z, radius));
 }
