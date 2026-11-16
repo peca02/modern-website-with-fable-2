@@ -22,21 +22,25 @@ Keep this table current; never write "latest".
 
 | Package | Version |
 | --- | --- |
-| Node / npm | TBD |
-| next | TBD |
-| react / react-dom | TBD |
-| typescript | TBD |
-| tailwindcss | TBD |
-| three | TBD |
-| @react-three/fiber | TBD |
-| @react-three/drei | TBD |
-| post-processing package(s) | TBD |
-| gsap / @gsap/react | TBD |
-| react-icons | TBD |
-| eslint / eslint-plugin-react-hooks | TBD |
-| playwright (dev only) | TBD |
+| Node / npm | 22.23.4 / 10.9.9 |
+| next / eslint-config-next | 16.4.6 |
+| react / react-dom | 19.3.1 |
+| typescript | 6.0.3 (7.x breaks typescript-eslint) |
+| tailwindcss / @tailwindcss/turbopack | 4.3.5 |
+| three / @types/three | 0.187.0 |
+| @react-three/fiber | 9.8.2 |
+| @react-three/drei | 10.7.9 |
+| postprocessing / @react-three/postprocessing | not installed; 6.39.6 / 3.2.2 verified compatible, add only if a frame needs it |
+| gsap / @gsap/react | 3.15.1 / 2.1.2 |
+| react-icons | 5.7.0 |
+| eslint / eslint-plugin-react-hooks | 9.39.5 (10.x breaks eslint-config-next) / 7.1.1 |
+| babel-plugin-react-compiler | 1.0.0 (`reactCompiler: true`) |
+| @types/react / @types/react-dom / @types/node | 19.3.0 / 19.3.0 / 22.20.5 |
+| playwright (dev only) | 1.63.0 (must match the preinstalled Chromium) |
 
-Renderer: TBD (WebGL 2 + GLSL, or WebGPU; never both).
+Renderer: WebGL 2 + GLSL. No WebGPU, no TSL. The canvas is transparent over the
+CSS page color; there are no WebGL post passes (grain is a DOM overlay).
+Tailwind runs through the `@tailwindcss/turbopack` loader (see `next.config.ts`).
 
 ## Working mode and budget
 
