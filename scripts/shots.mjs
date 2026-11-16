@@ -1,6 +1,7 @@
-// Usage: npm run shots -- <chapter-id> <width> [--reduced] [--pointer=0.6,0.4] [--touch] [--url=http://localhost:3000]
+// Usage: npm run shots -- <chapter-id> <width> [--reduced] [--pointer=0.6,0.4] [--touch] [--offset=0.5] [--url=http://localhost:3000]
 // --pointer takes viewport fractions and parks the mouse there before the shot.
 // --touch emulates a phone (coarse pointer, 3x screen), which selects the lowest quality tier.
+// --offset scrolls that many viewport heights past the top of the chapter.
 // One chapter and one width per run. Output: shots/<chapter>-<width>[-reduced].png
 import { mkdir } from "node:fs/promises";
 import { chromium } from "playwright";
@@ -13,6 +14,7 @@ const width = Number(widthArg);
 const reduced = flags.includes("--reduced");
 const touch = flags.includes("--touch");
 const pointer = flags.find((flag) => flag.startsWith("--pointer="))?.slice(10).split(",").map(Number);
+const offset = Number(flags.find((flag) => flag.startsWith("--offset="))?.slice(9) ?? 0);
 const url = flags.find((flag) => flag.startsWith("--url="))?.slice(6) ?? "http://localhost:3000";
 
 const browser = await chromium.launch({
@@ -34,10 +36,13 @@ const sceneReady = await page
   .catch(() => false);
 await page.evaluate(() => document.fonts.ready);
 // ScrollSmoother fixes the wrapper, so scrollIntoView does nothing; scroll the window instead.
-await page.evaluate((id) => {
-  const target = document.getElementById(id);
-  if (target) window.scrollTo(0, target.getBoundingClientRect().top + window.scrollY);
-}, chapter);
+await page.evaluate(
+  ([id, shift]) => {
+    const target = document.getElementById(id);
+    if (target) window.scrollTo(0, target.getBoundingClientRect().top + window.scrollY + shift * window.innerHeight);
+  },
+  [chapter, offset],
+);
 if (pointer) {
   const size = page.viewportSize();
   await page.mouse.move(pointer[0] * size.width, pointer[1] * size.height, { steps: 4 });
@@ -65,7 +70,7 @@ const state = await page.evaluate(() => ({
   scrollY: Math.round(window.scrollY),
 }));
 await mkdir("shots", { recursive: true });
-const file = `shots/${chapter}-${width}${reduced ? "-reduced" : ""}${pointer ? "-pointer" : ""}${touch ? "-touch" : ""}.png`;
-await page.screenshot({ path: file });
+const file = `shots/${chapter}${offset ? `+${offset}` : ""}-${width}${reduced ? "-reduced" : ""}${pointer ? "-pointer" : ""}${touch ? "-touch" : ""}.png`;
 console.log(JSON.stringify({ file, sceneReady, fps, ...state, errors }));
+await page.screenshot({ path: file, timeout: 90000 });
 await browser.close();

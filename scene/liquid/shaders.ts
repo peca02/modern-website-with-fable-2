@@ -21,8 +21,14 @@ const fragmentBody = /* glsl */ `
 uniform mat4 projectionMatrix;
 uniform vec4 uBlobs[MAX_BLOBS];
 uniform int uBlobCount;
+uniform vec2 uExtent;
 uniform float uSquash;
 uniform float uBlend;
+uniform float uCeiling;
+uniform float uSpike;
+uniform float uOrbSpike;
+uniform vec4 uSlab;
+uniform vec4 uSlabSize;
 uniform float uSwell;
 uniform float uSwellTime;
 uniform float uPixelAngle;
@@ -45,6 +51,69 @@ float smin(float a, float b, float k) {
   return min(a, b) - h * h * k * 0.25;
 }
 
+// Distance to a cone with its tip at the origin, opening along +y of q.
+float sdCone(vec2 q, float slope) {
+  vec2 c = normalize(vec2(slope, 1.0));
+  float d = length(q - c * max(dot(q, c), 0.0));
+  return q.x * c.y - q.y * c.x < 0.0 ? -d : d;
+}
+
+// Hexagonal lattice of cones standing on the mound (blob 0). Each cell holds
+// one cone; its height follows the local field, which falls off from the centre.
+const vec2 HEX = vec2(1.0, 1.7320508);
+
+float sdSpikes(vec3 p) {
+  vec2 g = p.xz / LATTICE;
+  vec2 a = mod(g, HEX) - HEX * 0.5;
+  vec2 b = mod(g - HEX * 0.5, HEX) - HEX * 0.5;
+  vec2 c = (g - (dot(a, a) < dot(b, b) ? a : b)) * LATTICE;
+  float local = uSpike * exp(-dot(c, c) / (ENVELOPE * ENVELOPE));
+  float rise = SPIKE_HEIGHT * smoothstep(CRITICAL, 1.0, local);
+  if (rise < 0.002) return 1e4;
+  vec4 mound = uBlobs[0];
+  vec2 o = c - mound.xz;
+  float base = uSquash * (mound.y + sqrt(max(mound.w * mound.w - dot(o, o), 0.0)));
+  return sdCone(vec2(length(p.xz - c), base + rise - p.y), SPIKE_SLOPE) - TIP_ROUND;
+}
+
+// Radial spikes on blob 0 along the 32 axes of an icosahedron and its dual.
+// The set is mirror-symmetric in every axis, so seven directions cover it.
+const vec3 ORB_AXES[7] = vec3[7](
+  vec3(0.0, 0.5257311, 0.8506508),
+  vec3(0.5257311, 0.8506508, 0.0),
+  vec3(0.8506508, 0.0, 0.5257311),
+  vec3(0.5773503),
+  vec3(0.0, 0.3568221, 0.9341724),
+  vec3(0.3568221, 0.9341724, 0.0),
+  vec3(0.9341724, 0.0, 0.3568221)
+);
+
+float sdOrbSpikes(vec3 p) {
+  vec4 orb = uBlobs[0];
+  vec3 v = abs(p - vec3(orb.x, orb.y * uSquash, orb.z));
+  vec3 axis = ORB_AXES[0];
+  float along = dot(v, axis);
+  for (int i = 1; i < 7; i++) {
+    float candidate = dot(v, ORB_AXES[i]);
+    if (candidate > along) {
+      along = candidate;
+      axis = ORB_AXES[i];
+    }
+  }
+  return sdCone(vec2(length(v - axis * along), orb.w + uOrbSpike - along), 0.2) - TIP_ROUND;
+}
+
+float sdSlab(vec3 p) {
+  vec3 v = p - uSlab.xyz;
+  float c = cos(SLAB_YAW);
+  float s = sin(SLAB_YAW);
+  v.xz = vec2(c * v.x - s * v.z, s * v.x + c * v.z);
+  vec3 e = abs(v) - uSlabSize.xyz + uSlabSize.w;
+  float d = length(max(e, 0.0)) + min(max(e.x, max(e.y, e.z)), 0.0) - uSlabSize.w;
+  // While the slab is absent it sits out of reach of the smooth minimum.
+  return d + (1.0 - uSlab.w) * 2.0;
+}
+
 float sdLiquid(vec3 p) {
   vec3 q = vec3(p.x, p.y / uSquash, p.z);
   float d = 1e4;
@@ -56,7 +125,11 @@ float sdLiquid(vec3 p) {
   // A slow swell far below the size of the body: it barely moves the
   // silhouette, but reflections magnify it, and that is what reads as liquid.
   float swell = sin(q.x * 4.2 + uSwellTime * 0.9) * sin(q.z * 3.6 - uSwellTime * 0.7) + 0.6 * sin(q.y * 5.0 + q.x * 2.0 + uSwellTime * 1.1);
-  return (d + swell * uSwell) * uSquash;
+  d = (d + swell * uSwell) * uSquash;
+  if (uSpike > 0.001) d = smin(d, sdSpikes(p), 0.14);
+  if (uOrbSpike > 0.001) d = smin(d, sdOrbSpikes(p), 0.1);
+  if (uSlab.w > 0.001) d = smin(d, sdSlab(p), 0.3);
+  return max(d, p.y - uCeiling);
 }
 
 vec3 liquidNormal(vec3 p) {
@@ -199,15 +272,18 @@ void main() {
   vec3 ro = cameraPosition;
   vec3 rd = normalize(vWorld - ro);
 
+  vec3 boxMax = vec3(uExtent.x, BOX_HEIGHT, uExtent.y);
   vec3 inv = 1.0 / rd;
-  vec3 t0 = (BOX_MIN - ro) * inv;
-  vec3 t1 = (BOX_MAX - ro) * inv;
+  vec3 t0 = (vec3(-uExtent.x, 0.0, -uExtent.y) - ro) * inv;
+  vec3 t1 = (boxMax - ro) * inv;
   vec3 tLow = min(t0, t1);
   vec3 tHigh = max(t0, t1);
   float tNear = max(max(tLow.x, tLow.y), max(tLow.z, 0.0));
   float tFar = min(min(tHigh.x, tHigh.y), tHigh.z);
   if (tFar <= tNear) discard;
 
+  // The lattice is only a bound between cells, so spiked bodies step shorter.
+  float stride = uSpike + uOrbSpike > 0.001 ? 0.8 : 1.0;
   float t = tNear;
   float coverage = 0.0;
   float nearest = 1e4;
@@ -224,7 +300,7 @@ void main() {
       tNearest = t;
       break;
     }
-    t += d;
+    t += d * stride;
     if (t > tFar) break;
   }
   // Rays that graze the body within a pixel get partial coverage: this is the
@@ -237,7 +313,7 @@ void main() {
   if (rd.y < 0.0) {
     float tFloor = -ro.y / rd.y;
     vec3 pf = ro + rd * tFloor;
-    vec2 span = abs(pf.xz) / BOX_MAX.xz;
+    vec2 span = abs(pf.xz) / uExtent;
     float fade = 1.0 - smoothstep(0.6, 1.0, max(span.x, span.y));
     if (fade > 0.0) {
       float shadow = contactShadow(pf);
@@ -255,7 +331,7 @@ void main() {
           break;
         }
         tr += d;
-        if (tr > 4.0 || q.y > BOX_MAX.y) break;
+        if (tr > 4.0 || q.y > BOX_HEIGHT) break;
       }
 #endif
 
