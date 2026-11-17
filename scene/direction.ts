@@ -168,6 +168,8 @@ export const direction = {
   grainTo: 0,
   grainMix: 0,
   grainWeight: 0,
+  /** 0–1 per Part droplet, eased toward `store.partFocus` */
+  focus: new Float32Array(4),
 };
 
 const shotFields = ["targetY", "elevation", "span", "wideX", "wideY", "tallX", "tallY", "tallFill"] as const;
@@ -198,4 +200,15 @@ export function direct(story: number, field: number) {
   direction.field = held ? field * (story < beats.fieldFall ? 1 : scrolledField) : scrolledField;
   direction.split = sample(tracks.split, story);
   direction.grainWeight = sample(tracks.grains, story);
+}
+
+const focusRate = 5;
+
+/** Eases each droplet's focus toward the focused row; nothing is focused while the droplets are not apart. */
+export function easeFocus(focused: number, delta: number, still: boolean) {
+  const ease = still ? 1 : 1 - Math.exp(-delta * focusRate);
+  for (let index = 0; index < direction.focus.length; index += 1) {
+    const goal = index === focused && direction.split > 0.5 ? 1 : 0;
+    direction.focus[index] += (goal - direction.focus[index]) * ease;
+  }
 }

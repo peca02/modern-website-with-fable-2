@@ -126,6 +126,11 @@
   font-stretch: calc(80% + 45% * var(--field, 1));
 }
 
+/* A Part row whose droplet is focused: --focus runs 0–1 from ink to the field colour. */
+@utility focus-mix {
+  color: color-mix(in oklab, var(--color-ink), var(--color-field) calc(var(--focus, 0) * 100%));
+}
+
 /* Range inputs can only be drawn through vendor pseudo-elements. */
 @utility field-range {
   appearance: none;

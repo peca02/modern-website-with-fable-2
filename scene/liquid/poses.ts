@@ -12,6 +12,8 @@ export type PoseInput = {
   split: number;
   /** 0–1, how much of the resting drop has gathered (the preloader) */
   mass: number;
+  /** 0–1 per Part droplet: the focused one swells and lifts */
+  focus: Float32Array;
 };
 
 const { rest, lean, magnet } = liquidModel;
@@ -96,8 +98,9 @@ function partPose(pose: Pose, input: PoseInput) {
   pose[poseLayout.extentZ] = 4.4;
   pose[poseLayout.blend] = 0.5 - 0.22 * split;
   for (let index = 0; index < 4; index += 1) {
-    const radius = 0.86 - 0.36 * split;
-    setBlob(pose, index, 0, 0.42 - 0.1 * split, (index - 1.5) * liquidModel.dropletPitch * split, radius);
+    const focus = input.focus[index];
+    const radius = (0.86 - 0.36 * split) * (1 + 0.1 * focus);
+    setBlob(pose, index, 0, 0.42 - 0.1 * split + 0.16 * focus, (index - 1.5) * liquidModel.dropletPitch * split, radius);
   }
 }
 

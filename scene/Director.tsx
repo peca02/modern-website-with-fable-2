@@ -4,14 +4,42 @@ import { useFrame } from "@react-three/fiber";
 import { MathUtils, PerspectiveCamera } from "three";
 import { loadClock } from "@/lib/loadClock";
 import { store } from "@/lib/store";
-import { direct, direction } from "@/scene/direction";
+import { direct, direction, easeFocus } from "@/scene/direction";
+
+let hoveredDroplet = -1;
+
+// The droplet under the pointer, from the anchors the liquid projected last frame.
+function dropletUnderPointer() {
+  const { droplets } = store.anchors;
+  const { pointer, viewport } = store;
+  if (!pointer.active || droplets[2] === 0 || droplets[5] === 0) return -1;
+  const x = (pointer.x * 0.5 + 0.5) * viewport.width;
+  const y = (0.5 - pointer.y * 0.5) * viewport.height;
+  // Half the distance between neighbours: the hit areas touch but never overlap.
+  const reach = 0.5 * Math.hypot(droplets[3] - droplets[0], droplets[4] - droplets[1]);
+  for (let index = 0; index < 4; index += 1) {
+    if (droplets[index * 3 + 2] === 0) continue;
+    if (Math.hypot(x - droplets[index * 3], y - droplets[index * 3 + 1]) < reach) return index;
+  }
+  return -1;
+}
 
 // Samples the shot list for the current scroll position and owns the camera.
 // Mounted first, so the liquid and the grains read a fresh `direction`.
 export function Director() {
-  useFrame(({ camera, size }) => {
+  useFrame(({ camera, size }, delta) => {
     direct(store.story, store.field);
     store.fieldLevel = direction.field;
+
+    // Write only on change, so a row the list has focused is not cleared every frame.
+    const droplet = dropletUnderPointer();
+    if (droplet !== hoveredDroplet) {
+      if (droplet >= 0) store.partFocus = droplet;
+      else if (store.partFocus === hoveredDroplet) store.partFocus = -1;
+      hoveredDroplet = droplet;
+    }
+    easeFocus(store.partFocus, Math.min(delta, 0.1), store.reducedMotion);
+
     if (!(camera instanceof PerspectiveCamera)) return;
 
     const { shot } = direction;

@@ -24,7 +24,7 @@ extend({ LiquidMaterial });
 const lean = new Lean();
 const poseFrom = createPose();
 const poseTo = createPose();
-const poseInput: PoseInput = { time: 0, still: false, reach: 0, field: 0, split: 0, mass: 0 };
+const poseInput: PoseInput = { time: 0, still: false, reach: 0, field: 0, split: 0, mass: 0, focus: direction.focus };
 const pointerRay = new Vector3();
 const anchor = new Vector3();
 const point: Point3 = { x: 0, y: 0, z: 0 };

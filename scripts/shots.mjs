@@ -1,5 +1,6 @@
-// Usage: npm run shots -- <chapter-id> <width> [--reduced] [--pointer=0.6,0.4] [--touch] [--offset=0.5] [--url=http://localhost:3000]
+// Usage: npm run shots -- <chapter-id> <width> [--reduced] [--pointer=0.6,0.4] [--touch] [--offset=0.5] [--row=1] [--url=http://localhost:3000]
 // --pointer takes viewport fractions and parks the mouse there before the shot.
+// --row hovers (or with --touch, taps) that Part row after the scroll has settled.
 // --touch emulates a phone (coarse pointer, 3x screen), which selects the lowest quality tier.
 // --offset scrolls that many viewport heights past the top of the chapter.
 // One chapter and one width per run. Output: shots/<chapter>-<width>[-reduced].png
@@ -15,6 +16,7 @@ const reduced = flags.includes("--reduced");
 const touch = flags.includes("--touch");
 const pointer = flags.find((flag) => flag.startsWith("--pointer="))?.slice(10).split(",").map(Number);
 const offset = Number(flags.find((flag) => flag.startsWith("--offset="))?.slice(9) ?? 0);
+const row = flags.find((flag) => flag.startsWith("--row="))?.slice(6);
 const url = flags.find((flag) => flag.startsWith("--url="))?.slice(6) ?? "http://localhost:3000";
 
 const browser = await chromium.launch({
@@ -53,6 +55,13 @@ if (pointer) {
 }
 // Reveals and scene eases run on GSAP time, which slows down with the frame rate.
 await page.waitForTimeout(width > 1024 ? 12000 : 4000);
+if (row !== undefined) {
+  // Rows keep following their droplets, so they are never "stable" for a locator action.
+  const box = await page.locator("#part li h3").nth(Number(row)).boundingBox();
+  if (box && touch) await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+  else if (box) await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 4 });
+  await page.waitForTimeout(4000);
+}
 
 // Relative only: headless Chromium renders on the CPU (SwiftShader).
 const fps = await page.evaluate(
@@ -75,7 +84,7 @@ const state = await page.evaluate(() => ({
   scrollY: Math.round(window.scrollY),
 }));
 await mkdir("shots", { recursive: true });
-const file = `shots/${chapter}${offset ? `+${offset}` : ""}-${width}${reduced ? "-reduced" : ""}${pointer ? "-pointer" : ""}${touch ? "-touch" : ""}.png`;
+const file = `shots/${chapter}${offset ? `+${offset}` : ""}-${width}${reduced ? "-reduced" : ""}${pointer ? "-pointer" : ""}${row !== undefined ? `-row${row}` : ""}${touch ? "-touch" : ""}.png`;
 console.log(JSON.stringify({ file, sceneReady, loaded, fps, ...state, errors }));
 await page.screenshot({ path: file, timeout: 90000 });
 await browser.close();

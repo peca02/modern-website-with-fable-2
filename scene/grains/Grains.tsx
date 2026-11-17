@@ -16,6 +16,7 @@ const frame: GrainFrame = {
   field: 0,
   split: 0,
   weight: 0,
+  focus: direction.focus,
   scale: 1,
   still: false,
 };

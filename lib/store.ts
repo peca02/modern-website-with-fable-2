@@ -25,6 +25,8 @@ export const store = {
   field: -1,
   /** 0–1, the field the scene is showing; written by the scene every frame */
   fieldLevel: 0,
+  /** Part row (and droplet) under the pointer or last tapped, else -1; written by the list and by the scene */
+  partFocus: -1,
   viewport: { width: 1, height: 1 },
   /**
    * Scene points projected to the viewport for DOM labels, written every

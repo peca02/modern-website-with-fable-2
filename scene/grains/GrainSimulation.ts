@@ -12,6 +12,7 @@ import {
   RGBAFormat,
   Scene,
   ShaderMaterial,
+  Vector4,
   WebGLRenderTarget,
   type WebGLRenderer,
 } from "three";
@@ -32,6 +33,8 @@ export type GrainFrame = {
   field: number;
   split: number;
   weight: number;
+  /** 0–1 per Part droplet */
+  focus: Float32Array;
   /** pixels a world unit covers at distance 1 */
   scale: number;
   still: boolean;
@@ -74,6 +77,7 @@ export class GrainSimulation {
         uMix: { value: 0 },
         uField: { value: 0 },
         uSplit: { value: 0 },
+        uFocus: { value: new Vector4() },
       },
       depthTest: false,
       depthWrite: false,
@@ -118,6 +122,7 @@ export class GrainSimulation {
     uniforms.uMix.value = frame.mix;
     uniforms.uField.value = frame.field;
     uniforms.uSplit.value = frame.split;
+    uniforms.uFocus.value.fromArray(frame.focus);
 
     const previous = renderer.getRenderTarget();
     renderer.setRenderTarget(write);

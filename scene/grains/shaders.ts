@@ -21,6 +21,7 @@ uniform int uShapeTo;
 uniform float uMix;
 uniform float uField;
 uniform float uSplit;
+uniform vec4 uFocus;
 
 const float TAU = 6.2831853;
 const float FLOOR = 0.012;
@@ -66,8 +67,10 @@ vec3 targetFor(int shape, vec4 h) {
   if (shape == 3) {
     // A ring on the floor around each droplet.
     float droplet = floor(h.x * 4.0);
-    float angle = TAU * h.z + uTime * 0.2;
-    float r = 0.74 + 0.14 * h.y * h.y;
+    // The ring of the focused droplet draws in close and turns faster.
+    float focus = dot(uFocus, vec4(equal(vec4(droplet), vec4(0.0, 1.0, 2.0, 3.0))));
+    float angle = TAU * h.z + uTime * (0.2 + 0.25 * focus);
+    float r = mix(0.74 + 0.14 * h.y * h.y, 0.66 + 0.04 * h.y, focus);
     return vec3(cos(angle) * r, FLOOR, (droplet - 1.5) * DROPLET_PITCH * uSplit + sin(angle) * r);
   }
   if (shape == 4) {
