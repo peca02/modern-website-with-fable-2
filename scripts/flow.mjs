@@ -118,7 +118,53 @@ if (shots) {
   await page.screenshot({ path: "shots/flow-nav.png", clip: { x: viewport.width - 600, y: 0, width: 600, height: 160 }, timeout: 90000 });
 }
 
-// 5. Refresh mid-page
+// 5. Part rows and droplets share one focus; press and hold raises the liquid
+const scrollToChapter = (id, shift) =>
+  page.evaluate(
+    ([target, offset]) => {
+      const top = document.getElementById(target).getBoundingClientRect().top + window.scrollY;
+      window.scrollTo(0, top + offset * window.innerHeight);
+    },
+    [id, shift],
+  );
+const poll = (condition, argument) =>
+  page.waitForFunction(condition, argument, { timeout: 90000 }).then(
+    () => true,
+    () => false,
+  );
+const rowFocus = (index) =>
+  page.evaluate((row) => Number(document.querySelectorAll("#part li")[row].style.getPropertyValue("--focus")), index);
+
+await scrollToChapter("part", 0.6);
+check("part: droplets apart", await poll(() => window.tarnStore.anchors.droplets[2] > 0));
+const rowBox = await page.locator("#part li h3").nth(1).boundingBox();
+await page.mouse.move(rowBox.x + rowBox.width / 2, rowBox.y + rowBox.height / 2, { steps: 4 });
+const rowLit = await poll(() => Number(document.querySelectorAll("#part li")[1].style.getPropertyValue("--focus")) > 0.5);
+check("part: hovering a row focuses it", rowLit && (await page.evaluate(() => window.tarnStore.partFocus)) === 1, `--focus ${await rowFocus(1)}`);
+const droplet = await page.evaluate(() => Array.from(window.tarnStore.anchors.droplets.slice(6, 8)));
+await page.mouse.move(droplet[0], droplet[1], { steps: 4 });
+const dropletLit = await poll(() => Number(document.querySelectorAll("#part li")[2].style.getPropertyValue("--focus")) > 0.5);
+check("part: pointing at a droplet focuses its row", dropletLit && (await page.evaluate(() => window.tarnStore.partFocus)) === 2, `--focus ${await rowFocus(2)}`);
+
+await scrollToChapter("still", 0);
+await poll(() => window.tarnStore.story < 0.1);
+await page.mouse.move(viewport.width * 0.6, viewport.height * 0.3, { steps: 4 });
+await page.mouse.down();
+const raised = await poll(() => window.tarnStore.press > 0.3);
+check("press: holding raises the liquid", raised, `press ${await page.evaluate(() => window.tarnStore.press.toFixed(2))}`);
+await page.mouse.up();
+const released = await poll(() => window.tarnStore.press < 0.05);
+check("press: releasing lets it go", released, `press ${await page.evaluate(() => window.tarnStore.press.toFixed(2))}`);
+const linkBox = await page.locator("[data-chapter-link=reach]").boundingBox();
+await page.mouse.move(linkBox.x + linkBox.width / 2, linkBox.y + linkBox.height / 2);
+await page.mouse.down();
+const grabbed = await page.evaluate(() => window.tarnStore.pointer.grab);
+await page.keyboard.press("Escape");
+await page.mouse.move(viewport.width * 0.6, viewport.height * 0.5);
+await page.mouse.up();
+check("press: a press on a link is not a hold", !grabbed);
+
+// 6. Refresh mid-page
 const before = await page.evaluate(() => {
   window.scrollTo(0, document.documentElement.scrollHeight);
   return Math.round(window.scrollY);
@@ -134,7 +180,7 @@ if (shots) await page.screenshot({ path: "shots/flow-refresh.png", timeout: 9000
 check("no console errors", errors.length === 0, errors.join(" | "));
 await context.close();
 
-// 6. No WebGL
+// 7. No WebGL
 const bare = await browser.newContext({ viewport });
 await bare.addInitScript(removeWebGL);
 const barePage = await bare.newPage();
@@ -149,7 +195,7 @@ if (shots) {
 }
 await bare.close();
 
-// 7. Lost context
+// 8. Lost context
 const lost = await browser.newContext({ viewport });
 const lostPage = await lost.newPage();
 await lostPage.goto(url, { waitUntil: "commit" });
@@ -162,7 +208,7 @@ check("lost context: drawing shown", await lostPage.isVisible("[data-scene-fallb
 check("lost context: content shown", (await contentVisibility(lostPage)) === "visible");
 await lost.close();
 
-// 8. Stalled load: the chunk that holds the shaders never arrives
+// 9. Stalled load: the chunk that holds the shaders never arrives
 const stalled = await browser.newContext({ viewport });
 const stalledPage = await stalled.newPage();
 await stalledPage.route("**/_next/static/chunks/**", async (route) => {
@@ -177,7 +223,7 @@ check("stalled load: the timeout releases the preloader", stalledAs.startsWith("
 check("stalled load: content shown", (await contentVisibility(stalledPage)) === "visible");
 await stalled.close();
 
-// 9. Reduced motion
+// 10. Reduced motion
 const calm = await browser.newContext({ viewport, reducedMotion: "reduce" });
 const calmPage = await calm.newPage();
 await calmPage.goto(url, { waitUntil: "commit" });
@@ -201,7 +247,7 @@ check("reduced motion: no smooth scroll", calmState.wrapper !== "fixed" && calmS
 check("reduced motion: content complete", calmState.hidden === 0, `${calmState.hidden} hidden elements`);
 await calm.close();
 
-// 10. JavaScript disabled
+// 11. JavaScript disabled
 const plain = await browser.newContext({ viewport, javaScriptEnabled: false });
 const plainPage = await plain.newPage();
 await plainPage.goto(url, { waitUntil: "load" });
@@ -218,7 +264,7 @@ check("no script: drawing shown", await plainPage.isVisible("[data-scene-fallbac
 check("no script: no preloader in the way", !(await plainPage.isVisible("[role=status]")));
 if (shots) await plainPage.screenshot({ path: "shots/flow-noscript.png" });
 
-// 11. Headings
+// 12. Headings
 const levels = headings.map((heading) => heading.level);
 check("headings: one h1", levels.filter((level) => level === 1).length === 1 && levels[0] === 1);
 check("headings: no level skipped", levels.every((level, index) => index === 0 || level - levels[index - 1] <= 1), levels.join(""));

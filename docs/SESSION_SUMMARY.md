@@ -6,9 +6,9 @@ Line for the owner to paste into the next session: "Prethodni rad je na grani
 `claude/ecstatic-rubin-69cwed`. Prvo uradi `git fetch origin` i
 `git merge --ff-only origin/claude/ecstatic-rubin-69cwed`, pa tek onda
 pročitaj CLAUDE.md, docs/SESSION_SUMMARY.md i docs/ART_DIRECTION.md i nastavi
-sa fazom 6a."
+sa fazom 6b."
 
-If the phase table below does not show 6a as next, the checkout is stale:
+If the phase table below does not show 6b as next, the checkout is stale:
 fast-forward before doing anything else.
 
 ## Phases (one session each, merge two if a phase turns out small)
@@ -23,7 +23,7 @@ fast-forward before doing anything else.
 | 4 | Preloader (`lib/loadClock.ts`), droplet cursor and goo layer, sound, grain overlay, SVG fallback | done |
 | 5a | Visual pass: every chapter at five widths, phone, reduced motion; fix the frames | done |
 | 5b | Rest of the widths, remaining checks, OG image, icons, README, pull request, final report | done |
-| 6a | Polish, part one: Part rows and droplets answer each other, press and hold, the Hold slab | **next** |
+| 6a | Polish, part one: Part rows and droplets answer each other, press and hold, the Hold slab | done |
 | 6b | Polish, part two: settled wide frames, small framing fixes, OG wordmark in Archivo, PR text, final report | after 6a |
 
 ## What exists
@@ -245,38 +245,37 @@ part, hold, settle.
 - Pull request peca02/modern-website-with-fable-2#1 into `main` stays open;
   commits pushed to this branch join it. Do not open a second one.
 
-## Next step (phase 6a)
+## Phase 6a (done)
 
-One step at a time; commit and push after each. Look at every changed frame
-at 1024 and at 375 `--touch` before moving on.
-
-1. **Part rows and droplets** (signature moment 4). Add `store.partFocus`
-   (-1 or a row index). `components/PartList.tsx` sets it on pointer enter
-   and leave of a row; `scene/liquid/Liquid.tsx` also sets it when the
-   pointer ray is nearest one droplet, so it works from both sides. The
-   focused droplet swells and lifts a little (in `scene/liquid/poses.ts`,
-   part pose) and its grain ring tightens; the row shows it in the DOM with
-   one quiet change (for example the name in `field`). Eased, `settle`. Rows
-   are not controls: no `tabindex`, no roles. Touch: a tap on a row is enough.
-2. **Press and hold.** `store.pointer.down` exists and is only read by the
-   cursor. While held, the liquid under the pointer gathers and raises a
-   cusp toward it (the Reach idea, local and small), released with the
-   `tension` ease; the drone, if on, rises with it. It must work in Still
-   and must not fight the Crown field or the pinned poses: scale it by how
-   close the pose is to rest. Touch must still scroll: never
-   `preventDefault` on touch start, and ignore a press that turns into a scroll.
-3. **Hold slab.** The face is an even dark grey with one bent `field` strip,
-   and the grain frame on the floor is a thin black outline, which the art
-   direction forbids (no hairlines). Give the face a real picture of the
-   studio (soft box and wordmark panel, as on the drop: see how the analytic
-   studio is sampled in `scene/liquid/shaders.ts`; a flat face mirrors one
-   direction, so bow it more or tilt the slab until the lights land on it)
-   and turn the frame into a dense band of grains with soft edges
-   (`scene/grains/shaders.ts`, frame shape). Compare with the bridge and the
-   spiked sphere so the three forms have equal weight (`--offset` 0.4, 1.2, 1.8).
-4. Add a flow check for each new interaction (`scripts/flow.mjs`), restore
-   the promises in `docs/ART_DIRECTION.md` (signature moments 4 and 5 were
-   cut back to what existed), update this file, hand over to 6b.
+- `store.partFocus` (row index or -1): `components/PartList.tsx` sets it on
+  mouse/pen enter and leave and on tap (touch has no hover); `scene/Director.tsx`
+  sets it when the pointer is within half a droplet pitch of a droplet anchor,
+  writing only on change so the two sides never fight. `easeFocus()` in
+  `scene/direction.ts` eases `direction.focus` (per droplet); `partPose`
+  swells (+10%) and lifts the focused droplet; the grain ring draws in
+  (`uFocus`). The row's name uses the `focus-mix` utility (`--focus`, ink to
+  `field`). Focus clears when the droplets merge.
+- Press and hold: `store.pointer.grab` (down on the page, not on a link or
+  control, see `PointerInput.tsx`). `Press` in `scene/liquid/poses.ts` is a
+  spring (`liquidModel.press`: gather critically damped, release underdamped
+  so the body dips once). `raiseCusp` adds a six-blob chain toward the
+  pointer to the rest pose; the pose mix fades it outside rest; a scroll
+  faster than 0.25 vh/s cancels it. `store.press` raises the drone
+  (`lib/audio.ts`). Reduced motion: none.
+- Hold slab: `slabYaw` 0.13, new `slabPitch` 0.27, `slabPillow` 0.045; the
+  face mirrors the wordmark panel; swell damped to a quarter on the face. The
+  floor frame (grain shape 5) is a 1.45 half-size band with a triangular
+  spread. The three Hold forms were compared side by side at 1024.
+- Looked at: Part with a hovered row (1024) and a tapped row (375 `--touch`);
+  Still held (1024); slab at 1024 and 375 `--touch`; bridge and orb at 1024.
+- `npm run flow`: 44 of 44 (new: droplets apart, row hover focuses, pointing
+  at a droplet focuses its row, holding raises the liquid, release lets go,
+  a press on a link is not a hold). Under `navigator.webdriver` the store is
+  on `window.tarnStore` for these checks.
+- `scripts/shots.mjs` takes `--row=N` (hover, or tap with `--touch`) and
+  `--hold` (presses at `--pointer`, waits 20 s for the spring at 1 fps).
+- Not verified: a real touch press and hold (Playwright cannot hold a touch),
+  how the drone sounds rising, the release overshoot seen in motion.
 
 ## Phase 6b
 

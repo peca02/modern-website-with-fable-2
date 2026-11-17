@@ -96,8 +96,14 @@ Total scroll length: about nine to ten viewport heights.
    Headline letters gain mass with the field.
 4. Part: droplets line up with the rows of a DOM list (what Tarn makes:
    fluids, fields, vessels, commissions); the rows travel to droplet heights.
+   Rows and droplets answer each other: hover or tap a row, or point at a
+   droplet, and that droplet swells, its grain ring draws in, and the row's
+   name eases to `field`.
 5. A droplet cursor that stretches with speed and merges with the fixed
    controls (nav pill, sound toggle) through the goo layer at the top.
+6. Press and hold on the resting drop: it gathers a small cusp toward the
+   pointer (the Reach idea, local) and drops back past rest once on release;
+   the drone rises with it. Off with reduced motion; a scroll cancels it.
 
 ## Framing rules
 
@@ -117,8 +123,10 @@ Total scroll length: about nine to ten viewport heights.
   stays black on the light page; a lit wall behind the camera draws the soft
   band at the equator; key soft box above, white strip left, one thin `field`
   strip right, wordmark panel behind the camera. No Drei `Environment`.
+- The Hold slab turns only slightly and leans back so its face mirrors the
+  wordmark panel; the swell is damped there (a flat mirror magnifies it).
 - Transparent canvas; contact shadow is alpha. No post-processing passes.
 - Particles: GPGPU dark round grains, normal blending, depth-tested against
   the liquid's `gl_FragDepth`. None in the hero; they arrive with Reach as
   dipole field lines, then lattice heaps (Crown), droplet rings (Part), a
-  halo, a frame and a shell around the three Hold forms, and thin dust at the end.
+  halo, a soft band (not a line) and a shell around the three Hold forms, and thin dust at the end.

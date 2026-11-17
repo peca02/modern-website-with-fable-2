@@ -45,6 +45,8 @@ export function PointerInput() {
       pointer.grab = false;
     };
 
+    // The flow checks read the store; only an automated browser gets it.
+    if (navigator.webdriver) Object.assign(window, { tarnStore: store });
     resize();
     const options = { passive: true } as const;
     window.addEventListener("resize", resize, options);
