@@ -10,7 +10,7 @@ import { store } from "@/lib/store";
 import { LiquidMaterial } from "@/scene/liquid/LiquidMaterial";
 import { direction } from "@/scene/direction";
 import { blobCentre, createPose, liquid, liquidModel, mixPoses, poseLayout, spikeTip, type Point3 } from "@/scene/liquid/model";
-import { Lean, writePose, type PoseInput, type PullTarget } from "@/scene/liquid/poses";
+import { Lean, Press, writePose, type PoseInput, type PullTarget } from "@/scene/liquid/poses";
 import { createWordmarkTexture } from "@/scene/liquid/wordmark";
 
 declare module "@react-three/fiber" {
@@ -22,6 +22,7 @@ declare module "@react-three/fiber" {
 extend({ LiquidMaterial });
 
 const lean = new Lean();
+const press = new Press();
 const poseFrom = createPose();
 const poseTo = createPose();
 const poseInput: PoseInput = { time: 0, still: false, reach: 0, field: 0, split: 0, mass: 0, focus: direction.focus };
@@ -75,6 +76,12 @@ export function Liquid({ tier }: { tier: QualityTier }) {
     }
     const step = Math.min(delta, 0.1);
     lean.update(step, clock.elapsedTime, pullTarget, store.reducedMotion);
+    // A press that turns into a scroll lets go.
+    const held = store.pointer.grab && pullTarget !== null && Math.abs(store.scroll.velocity) < 0.25;
+    press.update(step, held, pullTarget, store.reducedMotion);
+    const restWeight =
+      direction.poseFrom === "rest" ? (direction.poseTo === "rest" ? 1 : 1 - direction.poseMix) : direction.poseTo === "rest" ? direction.poseMix : 0;
+    store.press = Math.max(press.amount, 0) * restWeight;
 
     poseInput.time = clock.elapsedTime;
     poseInput.still = store.reducedMotion;
@@ -82,11 +89,11 @@ export function Liquid({ tier }: { tier: QualityTier }) {
     poseInput.field = direction.field;
     poseInput.split = direction.split;
     poseInput.mass = loadClock.mass;
-    writePose(direction.poseFrom, poseFrom, poseInput, lean);
+    writePose(direction.poseFrom, poseFrom, poseInput, lean, press);
     if (direction.poseTo === direction.poseFrom) {
       liquid.pose.set(poseFrom);
     } else {
-      writePose(direction.poseTo, poseTo, poseInput, lean);
+      writePose(direction.poseTo, poseTo, poseInput, lean, press);
       mixPoses(liquid.pose, poseFrom, poseTo, direction.poseMix);
     }
 

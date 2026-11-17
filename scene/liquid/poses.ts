@@ -16,7 +16,7 @@ export type PoseInput = {
   focus: Float32Array;
 };
 
-const { rest, lean, magnet } = liquidModel;
+const { rest, lean, magnet, press } = liquidModel;
 
 // The resting drop leans toward the pointer: a second lobe hides inside it and
 // travels, so the body leans without ever losing its single mass.
@@ -42,7 +42,61 @@ export class Lean {
   }
 }
 
-function restPose(pose: Pose, input: PoseInput, leaning: Lean) {
+// Press and hold: a spring from 0 (rest) to 1 (a small cusp raised toward
+// the pointer). It is negative for a moment after a release.
+export class Press {
+  amount = 0;
+  x = 0;
+  y = 1;
+  private velocity = 0;
+
+  update(delta: number, held: boolean, target: PullTarget | null, still: boolean) {
+    if (still) {
+      this.amount = 0;
+      this.velocity = 0;
+      return;
+    }
+    if (held && target) {
+      const follow = 1 - Math.exp(-delta * lean.follow);
+      this.x += (target.x - this.x) * follow;
+      this.y += (target.y - this.y) * follow;
+    }
+    const goal = held ? 1 : 0;
+    const [stiffness, damping] = held ? press.gather : press.release;
+    // Fixed small steps keep the stiff release stable on slow frames.
+    for (let left = delta; left > 0; left -= 1 / 120) {
+      const step = Math.min(left, 1 / 120);
+      this.velocity += ((goal - this.amount) * stiffness - this.velocity * damping) * step;
+      this.amount += this.velocity * step;
+    }
+  }
+}
+
+// A short chain of shrinking blobs from inside the drop toward the pointer,
+// pre-squash: hidden at 0, a cusp at 1 (the Reach chain, local and small).
+const cusp = [
+  [0.9, 0.3],
+  [1.15, 0.2],
+  [1.38, 0.13],
+  [1.58, 0.08],
+  [1.74, 0.045],
+  [1.86, 0.02],
+] as const;
+
+function raiseCusp(pose: Pose, pressing: Press, centreX: number, size: number) {
+  const amount = Math.min(Math.max(pressing.amount, 0), 1);
+  if (amount < 0.001) return;
+  const dx = pressing.x / size - centreX / size;
+  const dy = Math.max(pressing.y / (rest.squash * size) - rest.lift, 0.35);
+  const length = Math.hypot(dx, dy);
+  pose[poseLayout.blend] = rest.blend - 0.3 * amount;
+  cusp.forEach(([distance, radius], index) => {
+    const travel = (0.5 + (distance - 0.5) * amount) * size;
+    setBlob(pose, index + 2, centreX + (dx / length) * travel, rest.lift * size + (dy / length) * travel, 0, radius * size);
+  });
+}
+
+function restPose(pose: Pose, input: PoseInput, leaning: Lean, pressing: Press) {
   const extension = Math.hypot(leaning.x, leaning.y) / lean.reach;
   const breath = input.still ? 0 : Math.sin(input.time * 0.7) * 0.006;
   // The lobe thins as it travels, which turns the bulge into a shoulder.
@@ -53,6 +107,8 @@ function restPose(pose: Pose, input: PoseInput, leaning: Lean) {
   // The main mass gives up what the lobe carries away, so the body leans instead of growing.
   setBlob(pose, 0, leaning.x * 0.22 * size, rest.lift * size, 0, rest.radius * (1 + breath - 0.07 * extension) * size);
   setBlob(pose, 1, leaning.x * size, lobeY, 0, lobeRadius);
+  pose[poseLayout.squash] = rest.squash * (1 + press.dip * Math.min(pressing.amount, 0));
+  raiseCusp(pose, pressing, leaning.x * 0.22 * size, size);
 }
 
 // A chain of shrinking blobs toward the magnet: the smooth minimum turns it
@@ -145,11 +201,11 @@ function poolPose(pose: Pose) {
   pool.forEach(([x, z, radius], index) => setBlob(pose, index, x, 0.25, z, radius));
 }
 
-export function writePose(id: PoseId, pose: Pose, input: PoseInput, leaning: Lean) {
+export function writePose(id: PoseId, pose: Pose, input: PoseInput, leaning: Lean, pressing: Press) {
   resetPose(pose);
   switch (id) {
     case "rest":
-      return restPose(pose, input, leaning);
+      return restPose(pose, input, leaning, pressing);
     case "reach":
       return reachPose(pose, input);
     case "crown":

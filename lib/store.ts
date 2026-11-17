@@ -18,6 +18,8 @@ export const store = {
     vx: 0,
     vy: 0,
     down: false,
+    /** held down on the page itself, not on a link or control */
+    grab: false,
     /** false until the first pointer event, and after the pointer leaves */
     active: false,
   },
@@ -25,6 +27,8 @@ export const store = {
   field: -1,
   /** 0–1, the field the scene is showing; written by the scene every frame */
   fieldLevel: 0,
+  /** 0–1, how far a press and hold has raised the liquid; written by the scene every frame */
+  press: 0,
   /** Part row (and droplet) under the pointer or last tapped, else -1; written by the list and by the scene */
   partFocus: -1,
   viewport: { width: 1, height: 1 },

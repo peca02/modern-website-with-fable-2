@@ -1,5 +1,6 @@
-// Usage: npm run shots -- <chapter-id> <width> [--reduced] [--pointer=0.6,0.4] [--touch] [--offset=0.5] [--row=1] [--url=http://localhost:3000]
+// Usage: npm run shots -- <chapter-id> <width> [--reduced] [--pointer=0.6,0.4] [--touch] [--offset=0.5] [--row=1] [--hold] [--url=http://localhost:3000]
 // --pointer takes viewport fractions and parks the mouse there before the shot.
+// --hold presses the mouse button at --pointer and keeps it down for the shot.
 // --row hovers (or with --touch, taps) that Part row after the scroll has settled.
 // --touch emulates a phone (coarse pointer, 3x screen), which selects the lowest quality tier.
 // --offset scrolls that many viewport heights past the top of the chapter.
@@ -16,6 +17,7 @@ const reduced = flags.includes("--reduced");
 const touch = flags.includes("--touch");
 const pointer = flags.find((flag) => flag.startsWith("--pointer="))?.slice(10).split(",").map(Number);
 const offset = Number(flags.find((flag) => flag.startsWith("--offset="))?.slice(9) ?? 0);
+const hold = flags.includes("--hold");
 const row = flags.find((flag) => flag.startsWith("--row="))?.slice(6);
 const url = flags.find((flag) => flag.startsWith("--url="))?.slice(6) ?? "http://localhost:3000";
 
@@ -52,7 +54,10 @@ await page.evaluate(
 if (pointer) {
   const size = page.viewportSize();
   await page.mouse.move(pointer[0] * size.width, pointer[1] * size.height, { steps: 4 });
+  if (hold) await page.mouse.down();
 }
+// The scene caps a frame at 0.1 s, so at one frame per second a held spring needs a long wait.
+if (hold) await page.waitForTimeout(20000);
 // Reveals and scene eases run on GSAP time, which slows down with the frame rate.
 await page.waitForTimeout(width > 1024 ? 12000 : 4000);
 if (row !== undefined) {
@@ -84,7 +89,7 @@ const state = await page.evaluate(() => ({
   scrollY: Math.round(window.scrollY),
 }));
 await mkdir("shots", { recursive: true });
-const file = `shots/${chapter}${offset ? `+${offset}` : ""}-${width}${reduced ? "-reduced" : ""}${pointer ? "-pointer" : ""}${row !== undefined ? `-row${row}` : ""}${touch ? "-touch" : ""}.png`;
+const file = `shots/${chapter}${offset ? `+${offset}` : ""}-${width}${reduced ? "-reduced" : ""}${pointer ? "-pointer" : ""}${hold ? "-hold" : ""}${row !== undefined ? `-row${row}` : ""}${touch ? "-touch" : ""}.png`;
 console.log(JSON.stringify({ file, sceneReady, loaded, fps, ...state, errors }));
 await page.screenshot({ path: file, timeout: 90000 });
 await browser.close();

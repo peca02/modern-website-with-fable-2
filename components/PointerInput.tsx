@@ -3,6 +3,9 @@
 import { useEffect } from "react";
 import { store } from "@/lib/store";
 
+// A press on these is a click, not a hand held over the liquid.
+const controls = "a, button, input, label, select, textarea, summary";
+
 export function PointerInput() {
   useEffect(() => {
     const { pointer, viewport } = store;
@@ -29,14 +32,17 @@ export function PointerInput() {
     const down = (event: PointerEvent) => {
       move(event);
       pointer.down = true;
+      pointer.grab = !(event.target instanceof Element && event.target.closest(controls));
     };
     const up = (event: PointerEvent) => {
       pointer.down = false;
+      pointer.grab = false;
       if (event.pointerType !== "mouse") pointer.active = false;
     };
     const leave = () => {
       pointer.active = false;
       pointer.down = false;
+      pointer.grab = false;
     };
 
     resize();

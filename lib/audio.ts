@@ -116,7 +116,8 @@ export function setSoundVisible(visible: boolean) {
 export function followScene() {
   if (!rig || !enabled) return;
   const now = rig.context.currentTime;
-  const field = store.fieldLevel;
+  // A held press raises the drone partway, as a field would.
+  const field = Math.max(store.fieldLevel, 0.6 * store.press);
   const speed = Math.min(Math.abs(store.scroll.velocity), 2) / 2;
 
   // The low tone rises a fifth and opens up as the field grows.

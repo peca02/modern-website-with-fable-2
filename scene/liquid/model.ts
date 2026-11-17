@@ -30,6 +30,14 @@ export const liquidModel = {
     /** follow rate in 1/s; low values read as viscous */
     follow: 2.6,
   },
+  press: {
+    /** stiffness and damping while held: slow and critically damped, it gathers without overshoot */
+    gather: [9, 6],
+    /** after release: stiff and underdamped, it drops back past rest once, like the `tension` ease */
+    release: [70, 7],
+    /** how far the body flattens when the release overshoots */
+    dip: 0.5,
+  },
   /** where the unseen magnet sits in the Reach chapter */
   magnet: { x: 1.75, y: 2.5, z: 0 },
   /** hexagonal lattice of spikes, centred on the world origin */
