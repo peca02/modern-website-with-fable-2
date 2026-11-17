@@ -81,11 +81,13 @@ vec3 targetFor(int shape, vec4 h) {
     return vec3(x * 0.955, 1.1 + x * 0.296 + 0.035 * (h.z - 0.5), sin(angle) * r);
   }
   if (shape == 5) {
-    // A square drawn on the floor around the slab, turned with it.
+    // A broad band on the floor around the slab, turned with it. Two hashes
+    // summed give a triangular spread across it, so its edges are soft.
     float along = fract(h.x * 4.0) * 2.0 - 1.0;
     float edge = floor(h.x * 4.0);
-    vec2 local = edge < 1.0 ? vec2(along, 1.0) : edge < 2.0 ? vec2(1.0, -along) : edge < 3.0 ? vec2(-along, -1.0) : vec2(-1.0, along);
-    local = local * 1.7 + (h.yz - 0.5) * 0.04;
+    float across = (h.y + fract(h.w * 13.7) - 1.0) * 0.32;
+    float side = 1.45 + across;
+    vec2 local = edge < 1.0 ? vec2(along * side, side) : edge < 2.0 ? vec2(side, -along * side) : edge < 3.0 ? vec2(-along * side, -side) : vec2(-side, along * side);
     float c = cos(SLAB_YAW);
     float s = sin(SLAB_YAW);
     return vec3(c * local.x + s * local.y, FLOOR, -s * local.x + c * local.y);

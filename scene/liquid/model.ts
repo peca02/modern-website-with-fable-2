@@ -52,10 +52,12 @@ export const liquidModel = {
     slope: 0.3,
     tipRound: 0.016,
   },
-  /** yaw of the slab in Hold, so one edge faces the camera */
-  slabYaw: 0.62,
+  /** yaw of the slab in Hold: enough to show one edge, little enough that the face still mirrors the room behind the camera */
+  slabYaw: 0.13,
+  /** the slab leans back so its face looks up into the wordmark panel instead of the dark side of the room */
+  slabPitch: 0.27,
   /** how far the slab's faces bow outward at their centre */
-  slabPillow: 0.05,
+  slabPillow: 0.045,
   /** vertical pitch of the four droplets in Part, along z */
   dropletPitch: 1.3,
   ceilingOff: 10,
@@ -193,6 +195,7 @@ export function liquidGlslConstants() {
     `const float SPIKE_SLOPE = ${glslFloat(crown.slope)};`,
     `const float TIP_ROUND = ${glslFloat(crown.tipRound)};`,
     `const float SLAB_YAW = ${glslFloat(liquidModel.slabYaw)};`,
+    `const float SLAB_PITCH = ${glslFloat(liquidModel.slabPitch)};`,
     `const float SLAB_PILLOW = ${glslFloat(liquidModel.slabPillow)};`,
     `const float DROPLET_PITCH = ${glslFloat(liquidModel.dropletPitch)};`,
     `const vec3 MAGNET = vec3(${glslFloat(magnet.x)}, ${glslFloat(magnet.y)}, ${glslFloat(magnet.z)});`,

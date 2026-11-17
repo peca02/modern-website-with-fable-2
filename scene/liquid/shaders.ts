@@ -109,14 +109,18 @@ float sdSlab(vec3 p) {
   float c = cos(SLAB_YAW);
   float s = sin(SLAB_YAW);
   v.xz = vec2(c * v.x - s * v.z, s * v.x + c * v.z);
+  float cp = cos(SLAB_PITCH);
+  float sp = sin(SLAB_PITCH);
+  v.yz = vec2(cp * v.y - sp * v.z, sp * v.y + cp * v.z);
   vec3 e = abs(v) - uSlabSize.xyz + uSlabSize.w;
   float d = length(max(e, 0.0)) + min(max(e.x, max(e.y, e.z)), 0.0) - uSlabSize.w;
   // A dead-flat face mirrors a single direction and reads as grey card.
-  // A shallow pillow and the body's swell spread the studio across it.
+  // A shallow pillow spreads the studio across it. The swell is kept faint:
+  // a flat mirror magnifies it, and the wordmark it holds would tear.
   vec2 face = v.xy / uSlabSize.xy;
   float pillow = max(1.0 - face.x * face.x, 0.0) * max(1.0 - face.y * face.y, 0.0);
   float ripple = sin(v.x * 4.2 + uSwellTime * 0.9) * sin(v.y * 3.6 - uSwellTime * 0.7);
-  d -= (SLAB_PILLOW + ripple * uSwell) * pillow;
+  d -= (SLAB_PILLOW + ripple * uSwell * 0.25) * pillow;
   // While the slab is absent it sits out of reach of the smooth minimum.
   return d + (1.0 - uSlab.w) * 2.0;
 }
