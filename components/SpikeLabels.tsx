@@ -29,12 +29,8 @@ export function SpikeLabels() {
       if (spikes[index * 3 + 2]) top = Math.min(top, spikes[index * 3 + 1] - origin.top);
     }
     const row = top - lift;
-    const order = [0, 1, 2].sort((a, b) => spikes[a * 3] - spikes[b * 3]);
-    const minLeft = edge - origin.left;
-    const maxRight = window.innerWidth - edge - origin.left;
-    let right = minLeft - gap;
-    let raised = 0;
-    for (const index of order) {
+    const items: { item: HTMLElement; lead: HTMLElement; x: number; tip: number; width: number; left: number }[] = [];
+    for (let index = 0; index < 3; index += 1) {
       const item = root.children[index];
       const lead = item?.firstElementChild;
       if (!(item instanceof HTMLElement) || !(lead instanceof HTMLElement)) continue;
@@ -43,16 +39,36 @@ export function SpikeLabels() {
       opacity.current[index] = next;
       item.style.opacity = next.toFixed(3);
       if (!present) continue;
-
       const x = spikes[index * 3] - origin.left;
-      const tip = spikes[index * 3 + 1] - origin.top;
       const width = item.offsetWidth;
-      let left = Math.min(Math.max(x - width / 2, right + gap, minLeft), maxRight - width);
+      items.push({ item, lead, x, tip: spikes[index * 3 + 1] - origin.top, width, left: x - width / 2 });
+    }
+    items.sort((a, b) => a.x - b.x);
+
+    // Each pill may slide sideways as long as its lead still meets it, and
+    // stays on screen. Push right, then left, until neighbours keep a gap.
+    const minLeft = edge - origin.left;
+    const maxRight = window.innerWidth - edge - origin.left;
+    const low = (entry: (typeof items)[number]) => Math.max(entry.x - entry.width + edge, minLeft);
+    const high = (entry: (typeof items)[number]) => Math.min(entry.x - edge, maxRight - entry.width);
+    for (let pass = 0; pass < 3; pass += 1) {
+      for (let index = 1; index < items.length; index += 1) {
+        const before = items[index - 1];
+        items[index].left = Math.min(Math.max(items[index].left, before.left + before.width + gap), high(items[index]));
+      }
+      for (let index = items.length - 2; index >= 0; index -= 1) {
+        const after = items[index + 1];
+        items[index].left = Math.max(Math.min(items[index].left, after.left - gap - items[index].width), low(items[index]));
+      }
+    }
+
+    // Tips too close for one row: the label that still collides goes a row up.
+    let right = -Infinity;
+    let raised = 0;
+    for (const { item, lead, x, tip, width, left } of items) {
       let bottom = row;
-      // Pushed so far that its lead would miss the pill: stack it a row higher instead.
-      if (x < left + edge || x > left + width - edge) {
+      if (left < right + gap) {
         raised += 1;
-        left = Math.min(Math.max(x - width / 2, minLeft), maxRight - width);
         bottom = row - raised * (item.offsetHeight + gap);
       } else {
         right = left + width;
