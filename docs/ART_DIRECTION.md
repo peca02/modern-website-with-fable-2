@@ -123,10 +123,11 @@ Total scroll length: about nine to ten viewport heights.
   stays black on the light page; a lit wall behind the camera draws the soft
   band at the equator; key soft box above, white strip left, one thin `field`
   strip right, wordmark panel behind the camera. No Drei `Environment`.
-- The Hold slab turns only slightly and leans back so its face mirrors the
-  wordmark panel; the swell is damped there (a flat mirror magnifies it).
+- The Hold slab and its grain frame keep their phase 5 look (yaw 0.62, a
+  thin outline frame on the floor): the owner tried a wordmark-mirroring
+  slab with a soft band in 6a and chose the original. Do not change it again.
 - Transparent canvas; contact shadow is alpha. No post-processing passes.
 - Particles: GPGPU dark round grains, normal blending, depth-tested against
   the liquid's `gl_FragDepth`. None in the hero; they arrive with Reach as
   dipole field lines, then lattice heaps (Crown), droplet rings (Part), a
-  halo, a soft band (not a line) and a shell around the three Hold forms, and thin dust at the end.
+  halo, a frame and a shell around the three Hold forms, and thin dust at the end.

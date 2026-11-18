@@ -23,7 +23,7 @@ fast-forward before doing anything else.
 | 4 | Preloader (`lib/loadClock.ts`), droplet cursor and goo layer, sound, grain overlay, SVG fallback | done |
 | 5a | Visual pass: every chapter at five widths, phone, reduced motion; fix the frames | done |
 | 5b | Rest of the widths, remaining checks, OG image, icons, README, pull request, final report | done |
-| 6a | Polish, part one: Part rows and droplets answer each other, press and hold, the Hold slab | done |
+| 6a | Polish, part one: Part rows and droplets answer each other, press and hold (the slab change was reverted at the owner's request) | done |
 | 6b | Polish, part two: settled wide frames, small framing fixes, OG wordmark in Archivo, PR text, final report | after 6a |
 
 ## What exists
@@ -237,7 +237,7 @@ part, hold, settle.
 
 - The owner looked at the site on a real device and said it looks fine; no
   remarks on speed, motion or sound. Nothing here was measured.
-- Hold: keep the slab and fix it (do not replace the form).
+- Hold: keep the slab exactly as in phase 5 (decided after 6a).
 - Build both missing interactions: Part rows with their droplets, and press
   and hold.
 - Social image: fetch Archivo while building (an approved exception to
@@ -262,12 +262,12 @@ part, hold, settle.
   pointer to the rest pose; the pose mix fades it outside rest; a scroll
   faster than 0.25 vh/s cancels it. `store.press` raises the drone
   (`lib/audio.ts`). Reduced motion: none.
-- Hold slab: `slabYaw` 0.13, new `slabPitch` 0.27, `slabPillow` 0.045; the
-  face mirrors the wordmark panel; swell damped to a quarter on the face. The
-  floor frame (grain shape 5) is a 1.45 half-size band with a triangular
-  spread. The three Hold forms were compared side by side at 1024.
+- Hold slab: a wordmark-mirroring slab (less yaw, a backward lean) with a
+  soft grain band was built, then reverted: the owner prefers the original
+  slab and thin frame. `scene/liquid/shaders.ts` and the slab constants are
+  as in phase 5; do not touch the slab or its frame again.
 - Looked at: Part with a hovered row (1024) and a tapped row (375 `--touch`);
-  Still held (1024); slab at 1024 and 375 `--touch`; bridge and orb at 1024.
+  Still held (1024).
 - `npm run flow`: 44 of 44 (new: droplets apart, row hover focuses, pointing
   at a droplet focuses its row, holding raises the liquid, release lets go,
   a press on a link is not a hold). Under `navigator.webdriver` the store is
