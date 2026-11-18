@@ -24,7 +24,7 @@ fast-forward before doing anything else.
 | 5a | Visual pass: every chapter at five widths, phone, reduced motion; fix the frames | done |
 | 5b | Rest of the widths, remaining checks, OG image, icons, README, pull request, final report | done |
 | 6a | Polish, part one: Part rows and droplets answer each other, press and hold (the slab change was reverted at the owner's request) | done |
-| 6b | Polish, part two: settled wide frames, small framing fixes, OG wordmark in Archivo, PR text, final report | after 6a |
+| 6b | Polish, part two: settled wide frames, small framing fixes, OG wordmark in Archivo, PR text, final report | **next** |
 
 ## What exists
 
@@ -125,7 +125,7 @@ fast-forward before doing anything else.
 ```
 npm run lint && npm run typecheck && npx next build | tail -8
 npx next start -p 3000 &
-npm run shots -- <chapter-id> <375|768|1024|1440|1920> [--reduced] [--pointer=0.5,0.45] [--touch] [--offset=0.5]
+npm run shots -- <chapter-id> <375|768|1024|1440|1920> [--reduced] [--pointer=0.5,0.45] [--touch] [--offset=0.5] [--row=1] [--hold]
 npm run flow [-- --shots]
 ```
 
@@ -309,8 +309,17 @@ part, hold, settle.
 6. Bring `docs/TECH_AND_IDENTITY.md` (Serbian, the owner's reference for
    future sites) in line with what phase 6 changed; a few lines.
 7. lint, typecheck, build, `npm run flow`; update the text of the open pull
-   request (what changed, what was verified) through the GitHub tools; this
-   file; the final report in Serbian.
+   request (English: summary, how to run, what was verified) through the
+   GitHub tools; `README.md` if the scripts changed (`--row`, `--hold`);
+   this file.
+8. Final report to the owner, in Serbian (from `PROMPT.md` 722–739, so the
+   brief need not be opened): what was done; what was verified and how; what
+   was not verified and why; what is weaker than wanted, said plainly; where
+   the owner fills in the author credit (`lib/content.ts`). Self-check first:
+   the hard rules still hold (the 5b grep: no `any`, no suppressions, no hex
+   in components, default exports only where Next requires them, no asset
+   files), the version table in `CLAUDE.md` is exact, `CLAUDE.md` and
+   `docs/ART_DIRECTION.md` match what was built, everything is pushed.
 
 ## Still unverified after 5b
 

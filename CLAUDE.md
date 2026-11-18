@@ -19,7 +19,7 @@ Deployment target: Vercel.
 | 3 chapters | 322–346, 481–494, 520–526, 580–584, 705–718 | look and seed facts, GSAP pattern, readability, chapters, quality bar |
 | 4 preloader, cursor, sound, fallbacks | 496–518, 586–602 | sound, resilience patterns, interaction, reduced motion and fallbacks |
 | 5 verification and delivery | 670–739, then 53–178 for the final self-check | checklist, quality bar, final deliverables, hard rules |
-| 6 polish | 496–518 for sound, 586–602 for interaction, only if needed | the work list is in `docs/SESSION_SUMMARY.md` |
+| 6 polish | 496–518 for sound, 586–602 for interaction, only if needed | the work list and the final report checklist are in `docs/SESSION_SUMMARY.md` |
 
 ## Language
 
