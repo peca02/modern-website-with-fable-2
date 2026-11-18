@@ -8,7 +8,7 @@ Dva cilja ovog fajla:
 Tačne verzije paketa su u `CLAUDE.md` i `package.json`. Ovaj fajl je namerno na srpskom
 (izuzetak od pravila da je sve u repozitorijumu na engleskom) jer ga čita vlasnik.
 
-Stanje: napisano posle faze 5b. Faza 6 (doterivanje) menja detalje, ne ono što ovde piše.
+Stanje: usklađeno sa sajtom posle faze 6 (6a i 6b, doterivanje).
 
 ## 1. Glavna ideja arhitekture
 
@@ -19,8 +19,9 @@ Sajt je jedna stranica sa dva sloja koja se ne mešaju:
 - **WebGL sloj** je jedan fiksiran, providan canvas iza DOM-a. Čisto je dekorativan
   (`aria-hidden`) i prikazuje jednu neprekidnu 3D scenu koja se menja dok korisnik skroluje.
 
-Dva sloja povezuje jedan deljeni objekat (`lib/store.ts`). GSAP u njega upisuje položaj
-skrola, pokazivač i jačinu polja, a 3D scena ga čita u svakom frejmu. Veza ide i u drugom
+Dva sloja povezuje jedan deljeni objekat (`lib/store.ts`). GSAP i DOM komponente u njega
+upisuju položaj skrola, pokazivač (i da li je pritisnut), jačinu polja i red liste na kom je
+fokus, a 3D scena ga čita u svakom frejmu. Veza ide i u drugom
 smeru: scena u `store.anchors` upisuje ekranske koordinate 3D tačaka, pa DOM elementi mogu
 da ih prate. Nema React state-a po frejmu i nema ponovnih renderovanja pri skrolu. To je
 najvažniji obrazac celog projekta.
@@ -62,7 +63,9 @@ najvažniji obrazac celog projekta.
   - sopstvene varijante za stanje umesto pravila u `@layer base`: `wide:` (pejzažni odnos
     strana, tekst ide u bočnu kolonu), `scene-live:`, `scripting:`, `fine:`,
     `in-data-pinned:`, `in-data-loaded:`;
-  - `text-shadow-halo`, svetli oreol iza teksta koji stoji preko scene, kao osiguranje.
+  - `text-shadow-halo`, svetli oreol iza teksta koji stoji preko scene, kao osiguranje;
+  - `text-balance` na naslovima poglavlja, da se redovi lome ujednačeno i da nijedna reč ne
+    ostane sama u redu.
 
 ### three.js i React Three Fiber
 
@@ -150,13 +153,16 @@ najvažniji obrazac celog projekta.
   ograničenje posle kog se preloader sam oslobađa.
 - **Kadriranje po obliku ekrana:** kamera pomera subjekat pomeranjem sočiva (lens shift), a
   ne okretanjem, u stranu na širokom ekranu i nagore ili nadole na portretnom, da tekst uvek
-  ima svoj prostor. Svaki kadar ima svoje vrednosti za široki i za portretni ekran.
+  ima svoj prostor. Svaki kadar ima svoje vrednosti za široki i za portretni ekran, i za to
+  koliki deo širine subjekat sme da zauzme na uskom ekranu (`narrowFill`), da npr. bazen na
+  telefonu ne pređe ivice.
 - **DOM koji prati 3D:** etikete na vrhovima šiljaka i redovi liste pored kapljica, preko
   `store.anchors`. Etikete stoje u redu iznad krune, svaka spojena sa svojim vrhom kratkom
   punom crtom; klize bočno dok crta pogađa etiketu, a tek onda prelaze red više. Veza ide
   u oba smera: hover ili dodir reda nadima kapljicu, a pokazivanje na kapljicu boji red.
 - **Pritisni i drži:** držanje miša na kapi diže mali šiljak ka pokazivaču (opruga), a dron
-  raste; skrol ga prekida.
+  raste; posle puštanja kap jednom propadne ispod mirovanja. Skrol ga prekida, a uz
+  smanjeno kretanje ga nema.
 - **Pravi DOM element upravlja scenom:** `<input type="range">` za jačinu polja; ista
   vrednost menja šiljke, težinu slova u naslovu (osa fonta) i visinu drona.
 - **Meniskus u DOM-u:** SVG goo filter na malom fiksnom sloju spaja kursor-kap sa
@@ -174,6 +180,8 @@ najvažniji obrazac celog projekta.
 6. Tek onda preloader, kursor, zvuk, rezervni crtež.
 7. Na kraju pregledaj svako poglavlje na pet širina, telefon i smanjeno kretanje, pa proveri
    na pravim uređajima.
+8. Doterivanje radi u malim koracima i pokaži svaki vlasniku: ovde je jedna veća izmena
+   (nova Hold ploča) urađena pa vraćena jer se stara više dopala.
 
 Radi po fazama, jedna faza po sesiji, sa kratkim `docs/SESSION_SUMMARY.md` za primopredaju.
 
@@ -193,7 +201,8 @@ Radi po fazama, jedna faza po sesiji, sa kratkim `docs/SESSION_SUMMARY.md` za pr
 ### Vizuelni identitet
 
 - **Vizuelni potpis:** masa i sjaj. Jedno telo ogledalno-crne tečnosti na svetloj stranici,
-  teška široka slova, pune crne forme koje se spajaju kao kapi. Bez linija, niti i kartica.
+  teška široka slova, pune crne forme koje se spajaju kao kapi. Bez tankih linija, niti i
+  kartica; jedine crte su kratke, debele, pune veze oznaka sa šiljcima u Crown.
 - **Paleta:** svetla, hladna pozadina boje porcelana (`#edeff1`), čisto crn tekst i tečnost
   (`#000000`), sivi tonovi (`#f7f8f9`, `#d3d8de`, `#4a4f57`) i jedan redak akcenat,
   ultramarin plava „field" (`#2433ff`).
