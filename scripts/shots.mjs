@@ -60,6 +60,34 @@ if (pointer) {
 if (hold) await page.waitForTimeout(20000);
 // Reveals and scene eases run on GSAP time, which slows down with the frame rate.
 await page.waitForTimeout(width > 1024 ? 12000 : 4000);
+// Wide screens render slowly enough to catch a line mid-mask; wait until no line on screen moves.
+const settled = await page.evaluate(
+  () =>
+    new Promise((resolve) => {
+      const frame = () => new Promise((next) => requestAnimationFrame(() => requestAnimationFrame(next)));
+      const sample = () =>
+        [...document.querySelectorAll("[data-reveal] *")]
+          .filter((line) => {
+            const box = line.getBoundingClientRect();
+            return line.style.transform && box.bottom > 0 && box.top < window.innerHeight;
+          })
+          .map((line) => line.style.transform)
+          .join("|");
+      const start = performance.now();
+      let last = sample();
+      let still = 0;
+      const poll = async () => {
+        await frame();
+        const now = sample();
+        still = now === last ? still + 1 : 0;
+        last = now;
+        if (still >= 3) resolve(true);
+        else if (performance.now() - start > 60000) resolve(false);
+        else poll();
+      };
+      poll();
+    }),
+);
 if (row !== undefined) {
   // Rows keep following their droplets, so they are never "stable" for a locator action.
   const box = await page.locator("#part li h3").nth(Number(row)).boundingBox();
@@ -90,6 +118,6 @@ const state = await page.evaluate(() => ({
 }));
 await mkdir("shots", { recursive: true });
 const file = `shots/${chapter}${offset ? `+${offset}` : ""}-${width}${reduced ? "-reduced" : ""}${pointer ? "-pointer" : ""}${hold ? "-hold" : ""}${row !== undefined ? `-row${row}` : ""}${touch ? "-touch" : ""}.png`;
-console.log(JSON.stringify({ file, sceneReady, loaded, fps, ...state, errors }));
+console.log(JSON.stringify({ file, sceneReady, loaded, settled, fps, ...state, errors }));
 await page.screenshot({ path: file, timeout: 90000 });
 await browser.close();

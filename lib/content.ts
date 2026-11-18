@@ -92,7 +92,7 @@ export const hold = {
 
 export const settle = {
   id: "settle",
-  heading: "Take the field away and it lets go of every shape it was given.",
+  heading: "Take the field away and it lets go of every shape.",
   body: "What stays is the liquid, level and black, with the room in its surface again.",
   restart: "Return to the still surface",
 } as const;

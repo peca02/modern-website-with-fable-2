@@ -5,10 +5,13 @@ import { useTicker } from "@/hooks/useTicker";
 import { crown } from "@/lib/content";
 import { store } from "@/lib/store";
 
-const gap = 6;
+const gap = 8;
+const lift = 32;
+const edge = 12;
 
-// A plain list in the flow. While the chapter is pinned each label rides on a
-// spike tip, read from the anchors the scene projects every frame.
+// A plain list in the flow. While the chapter is pinned the labels line up
+// above the crown, each joined to its own spike tip by a short solid lead, so
+// no pill sits on a neighbouring spike.
 export function SpikeLabels() {
   const list = useRef<HTMLUListElement>(null);
   const opacity = useRef([0, 0, 0]);
@@ -21,27 +24,42 @@ export function SpikeLabels() {
 
     const origin = frame.getBoundingClientRect();
     const { spikes } = store.anchors;
-    const placed: { x: number; y: number; half: number }[] = [];
-    // Lowest tip first: it keeps its place and the labels above it step up
-    // until no two pills share the same spot.
-    const order = [0, 1, 2].sort((a, b) => spikes[b * 3 + 1] - spikes[a * 3 + 1]);
+    let top = Infinity;
+    for (let index = 0; index < 3; index += 1) {
+      if (spikes[index * 3 + 2]) top = Math.min(top, spikes[index * 3 + 1] - origin.top);
+    }
+    const row = top - lift;
+    const order = [0, 1, 2].sort((a, b) => spikes[a * 3] - spikes[b * 3]);
+    const minLeft = edge - origin.left;
+    const maxRight = window.innerWidth - edge - origin.left;
+    let right = minLeft - gap;
+    let raised = 0;
     for (const index of order) {
       const item = root.children[index];
-      if (!(item instanceof HTMLElement)) continue;
+      const lead = item?.firstElementChild;
+      if (!(item instanceof HTMLElement) || !(lead instanceof HTMLElement)) continue;
       const present = spikes[index * 3 + 2];
       const next = opacity.current[index] + (present - opacity.current[index]) * 0.12;
       opacity.current[index] = next;
       item.style.opacity = next.toFixed(3);
       if (!present) continue;
+
       const x = spikes[index * 3] - origin.left;
-      let y = spikes[index * 3 + 1] - origin.top;
-      const half = item.offsetWidth / 2;
-      const clearance = item.offsetHeight + gap;
-      for (const other of placed) {
-        if (Math.abs(x - other.x) < half + other.half + gap && y > other.y - clearance) y = other.y - clearance;
+      const tip = spikes[index * 3 + 1] - origin.top;
+      const width = item.offsetWidth;
+      let left = Math.min(Math.max(x - width / 2, right + gap, minLeft), maxRight - width);
+      let bottom = row;
+      // Pushed so far that its lead would miss the pill: stack it a row higher instead.
+      if (x < left + edge || x > left + width - edge) {
+        raised += 1;
+        left = Math.min(Math.max(x - width / 2, minLeft), maxRight - width);
+        bottom = row - raised * (item.offsetHeight + gap);
+      } else {
+        right = left + width;
       }
-      placed.push({ x, y, half });
-      item.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -160%)`;
+      item.style.transform = `translate3d(${left.toFixed(1)}px, ${bottom.toFixed(1)}px, 0) translateY(-100%)`;
+      lead.style.transform = `translate3d(${(x - left).toFixed(1)}px, 0, 0) translateX(-50%)`;
+      lead.style.height = `${Math.max(0, tip - bottom).toFixed(1)}px`;
     }
   });
 
@@ -56,6 +74,10 @@ export function SpikeLabels() {
           key={label}
           className="type-micro rounded-full bg-ink px-3 py-1 whitespace-nowrap text-chalk in-data-pinned:absolute in-data-pinned:top-0 in-data-pinned:left-0 in-data-pinned:opacity-0"
         >
+          <span
+            aria-hidden="true"
+            className="absolute top-full left-0 hidden w-1 rounded-b-full bg-ink in-data-pinned:block"
+          />
           {label}
         </li>
       ))}

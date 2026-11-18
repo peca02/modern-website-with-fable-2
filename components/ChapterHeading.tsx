@@ -10,7 +10,7 @@ export function ChapterHeading({ id, reveal = true, className = "", children }: 
       id={`${id}-heading`}
       tabIndex={-1}
       data-reveal={reveal ? "" : undefined}
-      className={`type-display outline-none ${className}`}
+      className={`type-display text-balance outline-none ${className}`}
     >
       {children}
     </h2>

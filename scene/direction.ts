@@ -47,16 +47,18 @@ export type Shot = {
   tallY: number;
   /** share of the viewport height the span takes on portrait screens that are not narrow */
   tallFill: number;
+  /** share of the viewport width the span takes on narrow screens */
+  narrowFill: number;
 };
 
 const shots = {
-  still: { targetY: 0.7, elevation: 11, span: 2, wideX: 0.2, wideY: 0.15, tallX: 0, tallY: 0.2, tallFill: 0.46 },
-  reach: { targetY: 1.05, elevation: 8, span: 3.9, wideX: -0.31, wideY: 0.1, tallX: 0, tallY: -0.12, tallFill: 0.46 },
-  crownProfile: { targetY: 0.5, elevation: 12, span: 3.1, wideX: 0.24, wideY: 0.06, tallX: 0, tallY: -0.16, tallFill: 0.46 },
-  crownTop: { targetY: 0.3, elevation: 60, span: 3.3, wideX: 0.24, wideY: 0.02, tallX: 0, tallY: -0.16, tallFill: 0.46 },
-  part: { targetY: 0.2, elevation: 66, span: 2.7, wideX: 0.28, wideY: 0, tallX: 0.37, tallY: 0.14, tallFill: 0.33 },
-  hold: { targetY: 1.1, elevation: 7, span: 3.1, wideX: 0, wideY: 0.07, tallX: 0, tallY: 0.06, tallFill: 0.46 },
-  settle: { targetY: 0.4, elevation: 15, span: 3.7, wideX: 0, wideY: 0.3, tallX: 0, tallY: 0.3, tallFill: 0.3 },
+  still: { targetY: 0.7, elevation: 11, span: 2, wideX: 0.2, wideY: 0.15, tallX: 0, tallY: 0.2, tallFill: 0.46, narrowFill: 0.62 },
+  reach: { targetY: 1.05, elevation: 8, span: 3.9, wideX: -0.31, wideY: 0.1, tallX: 0, tallY: -0.12, tallFill: 0.46, narrowFill: 0.62 },
+  crownProfile: { targetY: 0.5, elevation: 12, span: 3.1, wideX: 0.24, wideY: 0.06, tallX: 0, tallY: -0.16, tallFill: 0.46, narrowFill: 0.62 },
+  crownTop: { targetY: 0.3, elevation: 60, span: 3.3, wideX: 0.27, wideY: 0.02, tallX: 0, tallY: -0.16, tallFill: 0.46, narrowFill: 0.62 },
+  part: { targetY: 0.2, elevation: 66, span: 2.7, wideX: 0.3, wideY: 0, tallX: 0.34, tallY: 0.14, tallFill: 0.27, narrowFill: 0.58 },
+  hold: { targetY: 1.1, elevation: 7, span: 3.1, wideX: 0, wideY: 0.07, tallX: 0, tallY: 0.06, tallFill: 0.46, narrowFill: 0.62 },
+  settle: { targetY: 0.4, elevation: 15, span: 3.7, wideX: 0, wideY: 0.3, tallX: 0, tallY: 0.3, tallFill: 0.3, narrowFill: 0.42 },
 } satisfies Record<string, Shot>;
 
 const shotKeys: readonly (Keyed & { shot: Shot })[] = [
@@ -172,7 +174,7 @@ export const direction = {
   focus: new Float32Array(4),
 };
 
-const shotFields = ["targetY", "elevation", "span", "wideX", "wideY", "tallX", "tallY", "tallFill"] as const;
+const shotFields = ["targetY", "elevation", "span", "wideX", "wideY", "tallX", "tallY", "tallFill", "narrowFill"] as const;
 
 /** `field` is the field instrument's value, or -1 while it is untouched and the scroll drives the field. */
 export function direct(story: number, field: number) {
