@@ -1,0 +1,58 @@
+import type { Metadata, Viewport } from "next";
+import { Archivo, Instrument_Sans } from "next/font/google";
+import type { ReactNode } from "react";
+import { SceneFallback } from "@/components/SceneFallback";
+import { SceneMount } from "@/components/SceneMount";
+import { SmoothScroll } from "@/components/SmoothScroll";
+import { ChapterNav } from "@/components/ChapterNav";
+import { DropletCursor } from "@/components/DropletCursor";
+import { GrainOverlay } from "@/components/GrainOverlay";
+import { PointerInput } from "@/components/PointerInput";
+import { Preloader } from "@/components/Preloader";
+import { site } from "@/lib/content";
+import { palette } from "@/lib/palette";
+import "./globals.css";
+
+const archivo = Archivo({
+  subsets: ["latin"],
+  axes: ["wdth"],
+  variable: "--font-archivo",
+  display: "swap",
+});
+
+const instrument = Instrument_Sans({
+  subsets: ["latin"],
+  variable: "--font-instrument",
+  display: "swap",
+});
+
+const deploymentHost = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL;
+
+export const metadata: Metadata = {
+  metadataBase: new URL(deploymentHost ? `https://${deploymentHost}` : "http://localhost:3000"),
+  title: site.title,
+  description: site.description,
+  openGraph: { type: "website", siteName: site.name, title: site.title, description: site.description },
+  twitter: { card: "summary_large_image", title: site.title, description: site.description },
+};
+
+export const viewport: Viewport = {
+  themeColor: palette.page,
+};
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en" className={`${archivo.variable} ${instrument.variable}`}>
+      <body className="type-body bg-page text-ink">
+        <SceneFallback />
+        <SceneMount />
+        <PointerInput />
+        <Preloader />
+        <DropletCursor />
+        <ChapterNav />
+        <SmoothScroll>{children}</SmoothScroll>
+        <GrainOverlay />
+      </body>
+    </html>
+  );
+}

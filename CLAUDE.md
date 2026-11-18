@@ -9,6 +9,18 @@ Deployment target: Vercel.
 - Look, motion and copy rules: `docs/ART_DIRECTION.md`.
 - Current state and next step: `docs/SESSION_SUMMARY.md`.
 
+## Brief map
+
+`PROMPT.md` is long. Read only the lines for the phase at hand, once.
+
+| Phase | Lines | Content |
+| --- | --- | --- |
+| 2 scene | 467–479, 534–578 | scene pattern, liquid, particles, light scene |
+| 3 chapters | 322–346, 481–494, 520–526, 580–584, 705–718 | look and seed facts, GSAP pattern, readability, chapters, quality bar |
+| 4 preloader, cursor, sound, fallbacks | 496–518, 586–602 | sound, resilience patterns, interaction, reduced motion and fallbacks |
+| 5 verification and delivery | 670–739, then 53–178 for the final self-check | checklist, quality bar, final deliverables, hard rules |
+| 6 polish | 496–518 for sound, 586–602 for interaction, only if needed | the work list and the final report checklist are in `docs/SESSION_SUMMARY.md` |
+
 ## Language
 
 - Everything written to the owner (plan, announcements, questions, reports): Serbian.
@@ -22,21 +34,25 @@ Keep this table current; never write "latest".
 
 | Package | Version |
 | --- | --- |
-| Node / npm | TBD |
-| next | TBD |
-| react / react-dom | TBD |
-| typescript | TBD |
-| tailwindcss | TBD |
-| three | TBD |
-| @react-three/fiber | TBD |
-| @react-three/drei | TBD |
-| post-processing package(s) | TBD |
-| gsap / @gsap/react | TBD |
-| react-icons | TBD |
-| eslint / eslint-plugin-react-hooks | TBD |
-| playwright (dev only) | TBD |
+| Node / npm | 22.23.4 / 10.9.9 |
+| next / eslint-config-next | 16.4.6 |
+| react / react-dom | 19.3.1 |
+| typescript | 6.0.3 (7.x breaks typescript-eslint) |
+| tailwindcss / @tailwindcss/turbopack | 4.3.5 |
+| three / @types/three | 0.187.0 |
+| @react-three/fiber | 9.8.2 |
+| @react-three/drei | 10.7.9 |
+| postprocessing / @react-three/postprocessing | not installed; 6.39.6 / 3.2.2 verified compatible, add only if a frame needs it |
+| gsap / @gsap/react | 3.15.1 / 2.1.2 |
+| react-icons | 5.7.0 |
+| eslint / eslint-plugin-react-hooks | 9.39.5 (10.x breaks eslint-config-next) / 7.1.1 |
+| babel-plugin-react-compiler | 1.0.0 (`reactCompiler: true`) |
+| @types/react / @types/react-dom / @types/node | 19.3.0 / 19.3.0 / 22.20.5 |
+| playwright (dev only) | 1.63.0 (must match the preinstalled Chromium) |
 
-Renderer: TBD (WebGL 2 + GLSL, or WebGPU; never both).
+Renderer: WebGL 2 + GLSL. No WebGPU, no TSL. The canvas is transparent over the
+CSS page color; there are no WebGL post passes (grain is a DOM overlay).
+Tailwind runs through the `@tailwindcss/turbopack` loader (see `next.config.ts`).
 
 ## Working mode and budget
 
@@ -62,9 +78,15 @@ The owner is on a small 5-hour usage limit. Saving tokens matters more than spee
 9. End of every phase, or earlier if the session is getting large: update
    `docs/SESSION_SUMMARY.md` (done, verified, remaining, open questions, file
    paths, branch name), commit, push, tell the owner it is a good moment for a
-   new session. Never wait for autocompact.
-10. A new session starts by reading this file, `docs/SESSION_SUMMARY.md` and
-    `docs/ART_DIRECTION.md` — not the codebase.
+   new session and give the one line to paste into it, with the branch name.
+   Never wait for autocompact.
+10. A new session starts with `git fetch origin` and a fast-forward to the
+    remote copy of the work branch named in the owner's message: the fresh
+    checkout can be many commits behind, and then these docs are stale too.
+    If another `claude/...` branch has commits this one lacks, merge it. Only
+    then read this file, `docs/SESSION_SUMMARY.md` and
+    `docs/ART_DIRECTION.md` — not the codebase. `npm ci` if `node_modules` is
+    missing. Open only the code files the next step changes.
 11. After a limit reset or a long pause, continue exactly one thing.
 12. Keep this file, `docs/ART_DIRECTION.md` and `docs/SESSION_SUMMARY.md` short.
 13. Never depend on Ultracode or ask the owner to enable it.
@@ -83,6 +105,9 @@ The owner is on a small 5-hour usage limit. Saving tokens matters more than spee
 - Shader uniforms are written through refs or class instances. Never mutate a
   memoized value or a hook return value (React Compiler lint forbids it).
 - All copy lives in `lib/content.ts`. Colors come only from tokens.
+- The author credit stays the placeholder (`Your Name`, `#`) in
+  `lib/content.ts`. Never write the owner's real name or email into the
+  repository. Never push to `main`; it is reached only by the final pull request.
 - One route, statically prerendered. Chapters are server components; client
   components are small and add only motion and interaction.
 - 3D is fully procedural: own geometry, GLSL, GPU particles. No GLTF/GLB, no
@@ -95,11 +120,11 @@ The owner is on a small 5-hour usage limit. Saving tokens matters more than spee
 /app          routes, globals.css (tokens), opengraph-image.tsx, icon.tsx
 /components   DOM components (server by default)
 /scene        everything that imports three (client only, dynamically loaded)
-/lib          store, content, gsap, quality, loadClock, palette, audio, utils
+/lib          store, content, beats, jump, gsap, quality, loadClock, palette, audio, drop
 /hooks        custom hooks
 /types        shared types
 /scripts      dev-only verification scripts (Playwright)
-/docs         ART_DIRECTION.md, SESSION_SUMMARY.md
+/docs         ART_DIRECTION.md, SESSION_SUMMARY.md, TECH_AND_IDENTITY.md (Serbian, for the owner; sessions do not read it)
 ```
 
 Create folders only when needed. No empty directories.
@@ -145,6 +170,8 @@ Create folders only when needed. No empty directories.
 ## Typography
 
 - Fonts only through `next/font`. No CDN or external CSS.
+  One approved exception: `app/opengraph-image.tsx` may fetch Archivo and
+  Instrument Sans while building, with a fallback when the fetch fails.
 - Body line height 1.4–1.6; large text 1.1–1.3; line length 50–75 characters.
 
 ## Animation and sound
@@ -190,3 +217,5 @@ Create folders only when needed. No empty directories.
 
 - Never claim something works that could not be verified in the cloud (real
   frame rate, real phones, audio output, Safari). List it as unverified.
+- Verification is part of every phase: look at a screenshot of each frame you
+  build (`npm run shots`) and improve it before moving on.
