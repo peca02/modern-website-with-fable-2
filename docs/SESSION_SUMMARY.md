@@ -5,10 +5,9 @@ Branch: `claude/ecstatic-rubin-69cwed` (all work so far). Rewritten each session
 Line for the owner to paste into the next session: "Prethodni rad je na grani
 `claude/ecstatic-rubin-69cwed`. Prvo uradi `git fetch origin` i
 `git merge --ff-only origin/claude/ecstatic-rubin-69cwed`, pa tek onda
-pročitaj CLAUDE.md, docs/SESSION_SUMMARY.md i docs/ART_DIRECTION.md i nastavi
-sa fazom 6b."
+pročitaj CLAUDE.md, docs/SESSION_SUMMARY.md i docs/ART_DIRECTION.md i reci šta je sledeće."
 
-If the phase table below does not show 6b as next, the checkout is stale:
+If the phase table below does not show 6b as done, the checkout is stale:
 fast-forward before doing anything else.
 
 ## Phases (one session each, merge two if a phase turns out small)
@@ -24,7 +23,7 @@ fast-forward before doing anything else.
 | 5a | Visual pass: every chapter at five widths, phone, reduced motion; fix the frames | done |
 | 5b | Rest of the widths, remaining checks, OG image, icons, README, pull request, final report | done |
 | 6a | Polish, part one: Part rows and droplets answer each other, press and hold (the slab change was reverted at the owner's request) | done |
-| 6b | Polish, part two: settled wide frames, small framing fixes, OG wordmark in Archivo, PR text, final report | **next** |
+| 6b | Polish, part two: settled wide frames, small framing fixes, OG wordmark in Archivo, PR text, final report | done |
 
 ## What exists
 
@@ -277,51 +276,41 @@ part, hold, settle.
 - Not verified: a real touch press and hold (Playwright cannot hold a touch),
   how the drone sounds rising, the release overshoot seen in motion.
 
-## Phase 6b
+## Phase 6b (done)
 
-1. **Settled wide frames.** At 1440 and 1920 every shot caught headings
-   mid-reveal, so the settled text over the scene was never seen there.
-   Make `scripts/shots.mjs` wait until no `[data-reveal]` line in the
-   viewport is still moving (poll, up to 60 s), then look again at all six
-   chapters at 1440 and at 1920 and fix overlaps between text and subject.
-2. **Crown labels.** The three pills sit on top of neighbouring spikes and
-   one is cut by them. Offset each label away from the crown with a short
-   solid lead (not a hairline) or place them on the outer side of the tip;
-   check 375, 1024, 1920 (`components/SpikeLabels.tsx`).
-3. **Small framing fixes** (`scene/direction.ts`, `lib/content.ts`):
-   - Settle on a phone: the pool is wider than the screen and reads as a
-     band. `tallFill` only matters below 0.286 at 375x812; try 0.2.
-   - Part at 768: grain rings end about 13px from the right edge (`tallX`
-     is shared with the phone; it may need to ease with the aspect); the
-     heading is small there.
-   - Part at 1440: "Commissions" ends a few pixels from its grain ring.
-   - Crown at 1024 `--reduced`: lattice grains reach the instrument's readout.
-   - Settle's heading is four lines at 1024 and leaves one word alone on the
-     third line at 1440: shorten the line or balance the wrap.
-4. **Social image.** In `app/opengraph-image.tsx` fetch Archivo (width 125,
-   weight 900) from Google Fonts at build time and pass it to
-   `ImageResponse`. Satori takes TTF, OTF or WOFF, not WOFF2 and not a
-   variable file: request the CSS without a browser user agent, with
-   `&text=Tarn`, and read the font URL from it. If the fetch fails, fall
-   back to the built-in face so the build never breaks. Look at the image.
-5. Optional, only if the budget allows: a sound of its own on chapter
-   change; a fallback drawing that differs per chapter.
-6. Bring `docs/TECH_AND_IDENTITY.md` (Serbian, the owner's reference for
-   future sites) in line with what phase 6 changed; a few lines.
-7. lint, typecheck, build, `npm run flow`; update the text of the open pull
-   request (English: summary, how to run, what was verified) through the
-   GitHub tools; `README.md` if the scripts changed (`--row`, `--hold`);
-   this file.
-8. Final report to the owner, in Serbian (from `PROMPT.md` 722–739, so the
-   brief need not be opened): what was done; what was verified and how; what
-   was not verified and why; what is weaker than wanted, said plainly; where
-   the owner fills in the author credit (`lib/content.ts`). Self-check first:
-   the hard rules still hold (the 5b grep: no `any`, no suppressions, no hex
-   in components, default exports only where Next requires them, no asset
-   files), the version table in `CLAUDE.md` is exact, `CLAUDE.md` and
-   `docs/ART_DIRECTION.md` match what was built, everything is pushed.
+- `scripts/shots.mjs` waits until no `[data-reveal]` line on screen changes
+  its transform for three frame pairs (up to 60 s) and prints `settled`.
+  All six chapters were looked at settled at 1440 and 1920: no text over
+  the subject.
+- `components/SpikeLabels.tsx`: the pills line up 32px above the highest
+  visible tip, each joined to its tip by a 4px solid lead (`span` inside the
+  `li`). Pills slide sideways (forward and backward sweep) while the lead
+  still meets the pill and the pill stays on screen; one that still collides
+  goes a row up. In practice the middle label sits one row higher. Looked at
+  375 `--touch`, 1024, 1440, 1920.
+- `Shot.narrowFill` (share of the width on narrow screens, was a constant
+  0.62): Settle 0.42 so the phone pool fits; Part 0.58. Part: `tallX` 0.34,
+  `tallFill` 0.27 (768 rings now clear the edge), `wideX` 0.3 (1440:
+  "Commissions" clears its ring). `crownTop.wideX` 0.27 (reduced-motion
+  lattice further from the readout at 1024; still close, about 30px).
+- Settle heading shortened to "Take the field away and it lets go of every
+  shape."; every chapter heading has `text-balance`.
+- `app/opengraph-image.tsx` fetches Archivo (wdth 125, wght 900, subset to
+  "Tarn") and Instrument Sans 400 (subset to the line) as TTF at build time;
+  if either fails both use the built-in face. Looked at. The fallback path
+  was read, not exercised.
+- Optional item 5 (chapter sound, per-chapter fallback drawing) skipped for
+  the budget.
+- PR text updated; `README.md`, `CLAUDE.md`, `docs/ART_DIRECTION.md`,
+  `docs/TECH_AND_IDENTITY.md` brought in line.
 
-## Still unverified after 5b
+## Next
+
+Nothing is planned. The owner reviews pull request
+peca02/modern-website-with-fable-2#1 and merges it; any further change is a
+new request.
+
+## Still unverified
 
 Real GPU frame rate as a number, real phones and touch, Safari and Firefox,
 a screen reader, the half-float path, dragging the field input by hand.

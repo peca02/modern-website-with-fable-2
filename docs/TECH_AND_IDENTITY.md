@@ -37,7 +37,9 @@ najvažniji obrazac celog projekta.
   `next/dynamic` sa `ssr: false` (`components/SceneMount.tsx`), pa 3D kod nije u početnom
   paketu i tekst se vidi odmah.
 - **Dodatno:** OG slika i ikona se generišu u kodu (`app/opengraph-image.tsx`, `app/icon.tsx`)
-  iz istih vektorskih putanja kao rezervni crtež (`lib/drop.ts`).
+  iz istih vektorskih putanja kao rezervni crtež (`lib/drop.ts`). OG slika pri buildu
+  preuzme Archivo i Instrument Sans sa Google Fonts (samo slova koja koristi, TTF jer Satori
+  ne čita WOFF2); ako preuzimanje ne uspe, koristi ugrađeni font i build ne puca.
 
 ### TypeScript (strict) i ESLint
 
@@ -123,16 +125,19 @@ najvažniji obrazac celog projekta.
 
 ### React Icons, next/font
 
-- Ikone isključivo iz `react-icons`. Fontovi kroz `next/font` (bez spoljnih CSS-ova).
+- Ikone isključivo iz `react-icons`. Fontovi kroz `next/font` (bez spoljnih CSS-ova);
+  jedini izuzetak je OG slika (vidi gore).
 
 ### Playwright (samo za razvoj)
 
 - **Uloga:** provera izgleda i toka bez pravog browsera.
 - **Ovde:** `scripts/shots.mjs` pravi screenshot jednog poglavlja na jednoj širini;
-  `scripts/flow.mjs` prolazi 38 provera (preloader, tastatura, klizač, zvuk, osvežavanje,
+  `scripts/flow.mjs` prolazi 44 provere (preloader, tastatura, klizač, zvuk, osvežavanje,
   bez WebGL-a, izgubljen kontekst, zaglavljeno učitavanje, smanjeno kretanje, bez JavaScripta).
 - **Pouka:** u oblaku scena radi na procesoru, oko jedan kadar u sekundi. Skripte moraju da
   čekaju stanje (atribut na `<html>`), a ne fiksno vreme, i jedan snimak traje minut-dva.
+  Snimak čeka i da se nijedan red teksta na ekranu više ne pomera, inače široki ekrani
+  uhvate naslove usred otkrivanja.
 
 ## 3. Obrasci koji čine razliku
 
@@ -147,7 +152,11 @@ najvažniji obrazac celog projekta.
   ne okretanjem, u stranu na širokom ekranu i nagore ili nadole na portretnom, da tekst uvek
   ima svoj prostor. Svaki kadar ima svoje vrednosti za široki i za portretni ekran.
 - **DOM koji prati 3D:** etikete na vrhovima šiljaka i redovi liste pored kapljica, preko
-  `store.anchors`.
+  `store.anchors`. Etikete stoje u redu iznad krune, svaka spojena sa svojim vrhom kratkom
+  punom crtom; klize bočno dok crta pogađa etiketu, a tek onda prelaze red više. Veza ide
+  u oba smera: hover ili dodir reda nadima kapljicu, a pokazivanje na kapljicu boji red.
+- **Pritisni i drži:** držanje miša na kapi diže mali šiljak ka pokazivaču (opruga), a dron
+  raste; skrol ga prekida.
 - **Pravi DOM element upravlja scenom:** `<input type="range">` za jačinu polja; ista
   vrednost menja šiljke, težinu slova u naslovu (osa fonta) i visinu drona.
 - **Meniskus u DOM-u:** SVG goo filter na malom fiksnom sloju spaja kursor-kap sa
@@ -195,7 +204,8 @@ Radi po fazama, jedna faza po sesiji, sa kratkim `docs/SESSION_SUMMARY.md` za pr
 - **Pokret:** viskozan; dolasci se smiruju bez prebačaja, tekst se diže iz maske kao nivo
   tečnosti.
 - **Potpisni momenti:** preloader kao kap koja raste; natpis u odrazu; klizač polja koji
-  diže šiljke i deblja slova; lista čiji redovi stoje uz kapljice; kursor-kap.
+  diže šiljke i deblja slova; lista čiji redovi stoje uz kapljice i odgovaraju im;
+  pritisni i drži; kursor-kap.
 
 ### Prethodni sajt (SKEIN), da se ni on ne ponovi
 

@@ -91,8 +91,9 @@ Total scroll length: about nine to ten viewport heights.
    becomes the hero subject without a cut.
 2. The wordmark is drawn to a canvas texture and placed as a light in the
    studio, so it reads in the liquid's reflection.
-3. Crown: spikes rise with scroll, DOM labels follow real spike tips, and a
-   real `<input type="range">` drives the field (and pitch when sound is on).
+3. Crown: spikes rise with scroll, DOM labels on short solid leads follow real
+   spike tips, and a real `<input type="range">` drives the field (and pitch
+   when sound is on).
    Headline letters gain mass with the field.
 4. Part: droplets line up with the rows of a DOM list (what Tarn makes:
    fluids, fields, vessels, commissions); the rows travel to droplet heights.

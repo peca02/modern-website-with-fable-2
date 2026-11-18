@@ -170,8 +170,8 @@ Create folders only when needed. No empty directories.
 ## Typography
 
 - Fonts only through `next/font`. No CDN or external CSS.
-  One approved exception: `app/opengraph-image.tsx` may fetch Archivo while
-  building, with a fallback when the fetch fails.
+  One approved exception: `app/opengraph-image.tsx` may fetch Archivo and
+  Instrument Sans while building, with a fallback when the fetch fails.
 - Body line height 1.4–1.6; large text 1.1–1.3; line length 50–75 characters.
 
 ## Animation and sound

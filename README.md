@@ -58,7 +58,7 @@ npm run start
 | `npm run build` / `npm run start` | production build and server |
 | `npm run lint` | ESLint, including the React Compiler rules |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm run shots -- <chapter> <width>` | screenshot of one chapter at one width into `shots/` (needs a running server; options are listed at the top of `scripts/shots.mjs`) |
+| `npm run shots -- <chapter> <width>` | screenshot of one chapter at one width into `shots/`, taken once no text line on screen is still moving (needs a running server; options such as `--reduced`, `--touch`, `--offset`, `--pointer`, `--row` and `--hold` are listed at the top of `scripts/shots.mjs`) |
 | `npm run flow` | pass/fail walk through the preloader, keyboard path, field input, sound toggle, refresh, fallbacks, reduced motion and the page without JavaScript |
 
 Both verification scripts drive headless Chromium through Playwright. The
